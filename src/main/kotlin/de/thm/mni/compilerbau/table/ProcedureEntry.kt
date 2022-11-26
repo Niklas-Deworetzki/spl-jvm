@@ -10,7 +10,7 @@ import java.util.*
  * @param parameterTypes A list describing the parameters of the procedure.
  *                       See [ParameterType] for more information.
  */
-class ProcedureEntry(val localTable: SymbolTable?, val parameterTypes: List<ParameterType>) : Entry {
+class ProcedureEntry(val localTable: SymbolTable, val parameterTypes: List<ParameterType>) : Entry {
     val stackLayout: StackLayout = StackLayout()
 
     override fun toString() = "proc: (${
@@ -31,7 +31,7 @@ class ProcedureEntry(val localTable: SymbolTable?, val parameterTypes: List<Para
          * @return A ProcedureEntry containing all necessary information from phase 5 manually computed.
          */
         fun predefinedProcedureEntry(parameterTypes: List<ParameterType>, argumentAreaSize: Int): ProcedureEntry {
-            val procedureEntry = ProcedureEntry(null, parameterTypes)
+            val procedureEntry = ProcedureEntry(SymbolTable(), parameterTypes)
             procedureEntry.stackLayout.argumentAreaSize = argumentAreaSize
             return procedureEntry
         }
