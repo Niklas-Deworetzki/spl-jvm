@@ -9,5 +9,5 @@ import de.thm.mni.compilerbau.types.Type
  * Every variable has a semantic [Type] which has to be filled in during phase 4.
  */
 sealed class Variable : Node() {
-    var dataType: Type? = null
+    lateinit var dataType: Type
 }

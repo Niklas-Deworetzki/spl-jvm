@@ -10,5 +10,5 @@ import de.thm.mni.compilerbau.types.Type
  * during phase 4.
  */
 sealed class TypeExpression : Node() {
-    var dataType: Type? = null
+    lateinit var dataType: Type
 }
