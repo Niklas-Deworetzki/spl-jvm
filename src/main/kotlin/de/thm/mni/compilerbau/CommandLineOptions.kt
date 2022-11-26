@@ -10,14 +10,19 @@ class CommandLineOptions {
 
     @JvmField
     var phaseOption: PhaseOption? = null
+
     @JvmField
     var ershovOptimization = false
+
     @JvmField
     var doWhileEnabled = false
+
     @JvmField
     var firstClassBoolean = false
+
     @JvmField
     var nestedScopesEnabled = false
+
     @JvmField
     var leafProcedureOptimization = false
 
@@ -30,26 +35,6 @@ class CommandLineOptions {
         if (this.phaseOption != null) usageError("More than one phase option specified.")
         this.phaseOption = phaseOption
     }
-
-    // Unclosable stream to avoid closing stdout when no output file is given.
-    // Source: https://stackoverflow.com/a/23791138
-    @get:Throws(IOException::class)
-    val outputWriter: PrintWriter
-        get() {
-            // Unclosable stream to avoid closing stdout when no output file is given.
-            // Source: https://stackoverflow.com/a/23791138
-            class UnclosableOutputStream(out: OutputStream?) : FilterOutputStream(out) {
-                @Throws(IOException::class)
-                override fun close() {
-                    out.flush()
-                }
-            }
-            return if (outFilename.isEmpty()) PrintWriter(UnclosableOutputStream(System.out)) else PrintWriter(
-                    FileWriter(
-                            outFilename
-                    )
-            )
-        }
 
     companion object {
         private fun usageError(format: String, vararg args: Any) {
@@ -99,8 +84,8 @@ class CommandLineOptions {
                         System.exit(0)
                         if (!name.startsWith("--")) {
                             if (options.inFilename.isEmpty()) options.inFilename =
-                                    name else if (options.outFilename.isEmpty()) options.outFilename = name else usageError(
-                                    "Too many positional arguments!"
+                                name else if (options.outFilename.isEmpty()) options.outFilename = name else usageError(
+                                "Too many positional arguments!"
                             )
                         } else {
                             usageError("Unknown option '%s'!", name)
@@ -109,8 +94,8 @@ class CommandLineOptions {
 
                     else -> if (!name.startsWith("--")) {
                         if (options.inFilename.isEmpty()) options.inFilename =
-                                name else if (options.outFilename.isEmpty()) options.outFilename =
-                                name else usageError("Too many positional arguments!")
+                            name else if (options.outFilename.isEmpty()) options.outFilename =
+                            name else usageError("Too many positional arguments!")
                     } else {
                         usageError("Unknown option '%s'!", name)
                     }
