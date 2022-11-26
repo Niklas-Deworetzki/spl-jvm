@@ -10,4 +10,19 @@ object SplJvmDefinitions {
         Type.getInternalName(this.java)
 
     val REFERENCE_INTEGER_CLASS: String = AtomicInteger::class.javaTypeDescriptor()
+
+    val REFERENCE_INTEGER_METHOD_GET = object : LibraryMethod {
+        override val name = "get"
+        override val descriptor = "()I"
+    }
+
+    val REFERENCE_INTEGER_METHOD_SET = object : LibraryMethod {
+        override val name = "set"
+        override val descriptor = "(I)V"
+    }
+
+    interface LibraryMethod {
+        val name: String
+        val descriptor: String
+    }
 }
