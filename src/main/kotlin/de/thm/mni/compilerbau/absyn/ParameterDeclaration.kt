@@ -1,6 +1,5 @@
 package de.thm.mni.compilerbau.absyn
 
-import de.thm.mni.compilerbau.absyn.visitor.Visitor
 import de.thm.mni.compilerbau.table.Identifier
 
 /**
@@ -11,19 +10,11 @@ import de.thm.mni.compilerbau.table.Identifier
  * whether the parameter is passed as a reference.
  * Parameters are only visible in the local scope of their procedure.
  *
- * @param position       The position of the declaration in the source code.
  * @param name           The identifier of the declared parameter.
  * @param typeExpression The type expression used to express the parameters type.
  * @param isReference    A boolean value used to represent whether the parameter is passed as a reference.
  */
-class ParameterDeclaration(
-    position: Position,
-    val name: Identifier,
-    val typeExpression: TypeExpression,
-    val isReference: Boolean
-) : Node(position) {
-    override fun accept(visitor: Visitor) = visitor.visit(this)
-
+class ParameterDeclaration(val name: Identifier, val typeExpression: TypeExpression, val isReference: Boolean) :
+    Node() {
     override fun toString(): String = formatAst("ParameterDeclaration", name, typeExpression, isReference)
-
 }

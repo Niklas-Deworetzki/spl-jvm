@@ -5,4 +5,4 @@ package de.thm.mni.compilerbau.absyn
  *
  * There exist many different statements present in SPL, which may all occur in the body of a procedure.
  */
-sealed class Statement(position: Position) : Node(position)
+sealed class Statement : Node()

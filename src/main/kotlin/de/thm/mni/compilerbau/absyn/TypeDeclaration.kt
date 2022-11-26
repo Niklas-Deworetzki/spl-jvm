@@ -1,6 +1,5 @@
 package de.thm.mni.compilerbau.absyn
 
-import de.thm.mni.compilerbau.absyn.visitor.Visitor
 import de.thm.mni.compilerbau.table.Identifier
 
 /**
@@ -9,13 +8,9 @@ import de.thm.mni.compilerbau.table.Identifier
  * When declaring a type, you have to provide a name, which is used as the identifier of this declaration.
  * Additionally a [TypeExpression] has to be provided, which stands on the right hand side of the declaration.
  *
- * @param position       The position of the declaration in the source code.
  * @param name           The declarations identifier.
  * @param typeExpression The type expression associated with this declaration.
  */
-class TypeDeclaration(position: Position, name: Identifier, val typeExpression: TypeExpression) : GlobalDeclaration(position, name) {
-    override fun accept(visitor: Visitor) = visitor.visit(this)
-
+class TypeDeclaration(name: Identifier, val typeExpression: TypeExpression) : GlobalDeclaration(name) {
     override fun toString(): String = formatAst("TypeDeclaration", name, typeExpression)
-
 }

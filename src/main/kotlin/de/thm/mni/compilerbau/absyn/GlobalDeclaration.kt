@@ -8,7 +8,6 @@ import de.thm.mni.compilerbau.table.Identifier
  * Global declarations are all declarations done in the global scope.
  * This declarations may either be a [TypeDeclaration] or a [ProcedureDeclaration].
  *
- * @param position The global declarations position in the source code.
  * @param name     The identifier for this global declaration.
  */
-sealed class GlobalDeclaration(position: Position, val name: Identifier) : Node(position)
+sealed class GlobalDeclaration(val name: Identifier) : Node()

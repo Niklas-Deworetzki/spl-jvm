@@ -10,6 +10,6 @@ import de.thm.mni.compilerbau.types.Type
  *
  * Every expression has a semantic type, which has to be calculated in phase 4.
  */
-sealed class Expression(position: Position) : Node(position) {
+sealed class Expression : Node() {
     var dataType: Type? = null
 }

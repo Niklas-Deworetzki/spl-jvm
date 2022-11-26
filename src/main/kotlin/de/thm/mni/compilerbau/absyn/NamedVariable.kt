@@ -1,6 +1,5 @@
 package de.thm.mni.compilerbau.absyn
 
-import de.thm.mni.compilerbau.absyn.visitor.Visitor
 import de.thm.mni.compilerbau.table.Identifier
 
 /**
@@ -11,11 +10,8 @@ import de.thm.mni.compilerbau.table.Identifier
  *
  * A named variable is identified by its name, which is an [Identifier].
  *
- * @param position The position of the variable in the source code.
  * @param name     The identifier of the variable.
  */
-class NamedVariable(position: Position, val name: Identifier) : Variable(position) {
-    override fun accept(visitor: Visitor) = visitor.visit(this)
-
+class NamedVariable(val name: Identifier) : Variable() {
     override fun toString(): String = formatAst("NamedVariable", name)
 }
