@@ -9,12 +9,12 @@
     <version>1.0</version>
 
     <dependencies>
-
         <dependency>
-            <groupId>com.github.vbmacher</groupId>
-            <artifactId>java-cup-runtime</artifactId>
-            <version>11b-20160615</version>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>9.4</version>
         </dependency>
+
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
@@ -31,47 +31,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>de.jflex</groupId>
-                <artifactId>jflex-maven-plugin</artifactId>
-                <version>1.7.0</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <lexDefinitions>
-                        <definition>
-                            ${project.basedir}/src/main/kotlin/de/thm/mni/compilerbau/phases/_01_scanner/Scanner.flex
-                        </definition>
-                    </lexDefinitions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.github.vbmacher</groupId>
-                <artifactId>cup-maven-plugin</artifactId>
-                <version>11b-20160615</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <cupDefinition>
-                        ${project.basedir}/src/main/kotlin/de/thm/mni/compilerbau/phases/_02_03_parser/parser.cup
-                    </cupDefinition>
-                    <className>Parser</className>
-                    <symbolsName>Sym</symbolsName>
-                    <expectedConflicts>1</expectedConflicts>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -156,5 +115,4 @@
         <kotlin.version>1.6.20-RC</kotlin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
 </project>
