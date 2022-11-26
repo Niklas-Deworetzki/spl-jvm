@@ -8,11 +8,11 @@ package de.thm.mni.compilerbau.absyn
  * The operator defines, how the left and the right expression are combined.
  * The semantic type of an expression is dependant of the operator.
  *
- * @param leftOperand  The operand on the left-hand side of the operator.
+ * @param lhs  The operand on the left-hand side of the operator.
  * @param operator     The operator used in this expression.
- * @param rightOperand The operand on the right-hand side of the operator.
+ * @param rhs The operand on the right-hand side of the operator.
  */
-class BinaryExpression(val leftOperand: Expression, val operator: Operator, val rightOperand: Expression) :
+class BinaryExpression(val lhs: Expression, val operator: Operator, val rhs: Expression) :
     Expression() {
 
     enum class Operator(val representation: String) {
@@ -64,5 +64,5 @@ class BinaryExpression(val leftOperand: Expression, val operator: Operator, val 
         }
     }
 
-    override fun toString(): String = formatAst("BinaryExpression", operator, leftOperand, rightOperand)
+    override fun toString(): String = formatAst("BinaryExpression", operator, lhs, rhs)
 }
