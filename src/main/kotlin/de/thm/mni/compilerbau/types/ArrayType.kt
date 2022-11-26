@@ -7,6 +7,6 @@ package de.thm.mni.compilerbau.types
  * @param baseType  The type of the array's elements.
  * @param arraySize The number of elements in an array of this type.
  */
-class ArrayType(val baseType: Type, val arraySize: Int) : Type(arraySize * baseType.byteSize) {
+class ArrayType(val baseType: Type, val arraySize: Int) : Type {
     override fun toString() = "array [$arraySize] of $baseType"
 }
