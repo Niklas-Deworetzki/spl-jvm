@@ -1,6 +1,7 @@
 package de.thm.mni.compilerbau.table
 
 import de.thm.mni.compilerbau.types.Type
+import kotlin.properties.Delegates
 
 /**
  * Represents the table entry for variable- and parameter-declarations in SPL.
@@ -12,7 +13,7 @@ import de.thm.mni.compilerbau.types.Type
  *                    Only ever true for reference parameters, false for non-reference parameters and local variable.
  */
 class VariableEntry(val type: Type, val isReference: Boolean) : Entry {
-    var offset: Int? = null // This value has to be set in phase 5
+    var offset by Delegates.notNull<Int>()  // This value has to be set in phase 5
 
     override fun toString() = "var: ${if (isReference) "ref " else ""}$type"
 }
