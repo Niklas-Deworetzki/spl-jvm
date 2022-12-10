@@ -2,8 +2,8 @@ package de.thm.mni.compilerbau.phases._04a_tablebuild
 
 import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.absyn.*
-import de.thm.mni.compilerbau.phases.ErrorReport.Companion.quote
 import de.thm.mni.compilerbau.phases.Pass
+import de.thm.mni.compilerbau.reporting.Message.Companion.quoted
 import de.thm.mni.compilerbau.table.*
 import de.thm.mni.compilerbau.types.ArrayType
 import de.thm.mni.compilerbau.types.Type
@@ -29,7 +29,7 @@ class TableBuilder(private val options: CommandLineOptions) : Pass() {
                 reportError(
                     declaration.position,
                     "Redeclaration of %s as %s",
-                    declaration.name.quote(),
+                    declaration.name.quoted(),
                     describeGlobalDeclarationVariant(declaration)
                 )
             }
@@ -37,14 +37,14 @@ class TableBuilder(private val options: CommandLineOptions) : Pass() {
 
         when (val mainEntry = globalTable.lookup(IDENTIFIER_MAIN)) {
             null ->
-                reportError("Procedure %s is missing.", IDENTIFIER_MAIN.quote())
+                reportError("Procedure %s is missing.", IDENTIFIER_MAIN.quoted())
 
             is TypeEntry ->
-                reportError("The program entry point %s is not a procedure.", IDENTIFIER_MAIN.quote())
+                reportError("The program entry point %s is not a procedure.", IDENTIFIER_MAIN.quoted())
 
             is ProcedureEntry ->
                 if (mainEntry.parameterTypes.isNotEmpty())
-                    reportError("The program entry point %s must not have any parameters.", IDENTIFIER_MAIN.quote())
+                    reportError("The program entry point %s must not have any parameters.", IDENTIFIER_MAIN.quoted())
         }
 
         return globalTable
@@ -83,7 +83,7 @@ class TableBuilder(private val options: CommandLineOptions) : Pass() {
         }
 
     private fun enterLocal(scope: SymbolTable, name: Identifier, entry: Entry, what: String) {
-        if (!scope.enter(name, entry)) reportError("Redeclaration of %s as %s", name.quote(), what)
+        if (!scope.enter(name, entry)) reportError("Redeclaration of %s as %s", name.quoted(), what)
     }
 
     private fun describeGlobalDeclarationVariant(globalDeclaration: GlobalDeclaration): String =

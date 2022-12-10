@@ -1,8 +1,8 @@
 package de.thm.mni.compilerbau.phases._04b_semant
 
 import de.thm.mni.compilerbau.absyn.*
-import de.thm.mni.compilerbau.phases.ErrorReport.Companion.quote
 import de.thm.mni.compilerbau.phases.Pass
+import de.thm.mni.compilerbau.reporting.Message.Companion.quoted
 import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.table.VariableEntry
 import de.thm.mni.compilerbau.types.ArrayType
@@ -18,7 +18,7 @@ class TypeChecker(private val pass: Pass, val scope: SymbolTable) {
                 }
 
                 else -> {
-                    pass.reportError(variable.position, "Unknown variable %s.", variable.name.quote())
+                    pass.reportError(variable.position, "Unknown variable %s.", variable.name.quoted())
                     variable.dataType = PrimitiveType.Bottom
                 }
             }

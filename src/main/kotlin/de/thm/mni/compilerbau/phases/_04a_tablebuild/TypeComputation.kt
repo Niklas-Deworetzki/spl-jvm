@@ -1,8 +1,8 @@
 package de.thm.mni.compilerbau.phases._04a_tablebuild
 
 import de.thm.mni.compilerbau.absyn.*
-import de.thm.mni.compilerbau.phases.ErrorReport.Companion.quote
 import de.thm.mni.compilerbau.phases.Pass
+import de.thm.mni.compilerbau.reporting.Message.Companion.quoted
 import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.table.TypeEntry
 import de.thm.mni.compilerbau.types.ArrayType
@@ -24,7 +24,7 @@ class TypeComputation(private val pass: Pass, val scope: SymbolTable) {
                     pass.reportError(
                         typeExpression.position,
                         "Unknown type %s.",
-                        typeExpression.name.quote()
+                        typeExpression.name.quoted()
                     )
                     PrimitiveType.Bottom
                 }

@@ -1,6 +1,7 @@
 package de.thm.mni.compilerbau.reporting
 
 import de.thm.mni.compilerbau.position.Range
+import de.thm.mni.compilerbau.table.Identifier
 import org.fusesource.jansi.Ansi
 
 /**
@@ -61,6 +62,10 @@ interface Message {
         fun quote(obj: Any): String {
             return "`$obj'"
         }
+
+        fun Any.quoted(): String =
+            quote(this)
+
 
         fun <T> List<T>.join(defaultSeparator: String = ",", lastSeparator: String = "or"): String = when (size) {
             0 -> ""

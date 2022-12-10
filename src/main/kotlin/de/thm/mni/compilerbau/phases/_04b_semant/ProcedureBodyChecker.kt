@@ -1,8 +1,8 @@
 package de.thm.mni.compilerbau.phases._04b_semant
 
 import de.thm.mni.compilerbau.absyn.*
-import de.thm.mni.compilerbau.phases.ErrorReport.Companion.quote
 import de.thm.mni.compilerbau.phases.Pass
+import de.thm.mni.compilerbau.reporting.Message.Companion.quoted
 import de.thm.mni.compilerbau.table.ProcedureEntry
 import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.types.PrimitiveType
@@ -68,7 +68,7 @@ object ProcedureBodyChecker : Pass() {
             is CallStatement -> {
                 val targetEntry = checker.scope.upperLevel?.lookup(statement.procedureName)
                 if (targetEntry !is ProcedureEntry) {
-                    reportError(statement.position, "Undefined procedure %s.", statement.procedureName.quote())
+                    reportError(statement.position, "Undefined procedure %s.", statement.procedureName.quoted())
                     return
                 }
 
