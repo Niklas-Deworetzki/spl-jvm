@@ -67,7 +67,7 @@ class Scanner(private val file: File, options: CommandLineOptions) : Closeable {
     }
 
     private fun skipIgnored() {
-        while (skipWhitespace() and skipComment());
+        while (skipWhitespace() or skipComment());
     }
 
 
@@ -93,7 +93,7 @@ class Scanner(private val file: File, options: CommandLineOptions) : Closeable {
             ':' -> return consumeAssignmentVariant(TokenType.COLON, TokenType.ASSIGN)
             '<' -> return consumeAssignmentVariant(TokenType.OP_LT, TokenType.OP_LE)
             '>' -> return consumeAssignmentVariant(TokenType.OP_GT, TokenType.OP_GE)
-            else -> throw LexicalError(currentRange(), String.format("Illegal character 0x%X in input.", current))
+            else -> throw LexicalError(currentRange(), String.format("Illegal character 0x%02X in input.", current))
         }
     }
 
