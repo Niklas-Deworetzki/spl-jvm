@@ -9,6 +9,4 @@ import de.thm.mni.compilerbau.types.Type
  * They behave like a formula representing a concrete semantic [Type] which has to be calculated
  * during phase 4.
  */
-sealed class TypeExpression : Node() {
-    lateinit var dataType: Type
-}
+sealed class TypeExpression : Node()

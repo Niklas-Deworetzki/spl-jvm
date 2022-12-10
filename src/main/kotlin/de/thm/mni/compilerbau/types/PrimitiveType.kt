@@ -6,7 +6,8 @@ package de.thm.mni.compilerbau.types
  */
 enum class PrimitiveType(private val representation: String) : Type {
     Int("int"),
-    Bool("boolean");
+    Bool("boolean"),
+    Bottom("⊥");
 
     override fun toString(): String = representation
 }

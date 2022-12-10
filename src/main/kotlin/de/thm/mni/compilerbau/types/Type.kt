@@ -10,5 +10,6 @@ sealed interface Type {
         is ArrayType -> "[" + this.baseType.javaTypeDescriptor()
         PrimitiveType.Int -> "I"
         PrimitiveType.Bool -> "Z"
+        PrimitiveType.Bottom -> "V"
     }
 }

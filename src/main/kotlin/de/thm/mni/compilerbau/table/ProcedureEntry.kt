@@ -35,16 +35,16 @@ class ProcedureEntry(
 
     companion object {
         /**
-         * This static method is reserved for the creation of entries for predefined procedures, where the calculations of
-         * phase 5 have to be performed manually.
+         * This static method is reserved for the creation of entries for predefined procedures.
          *
          * @param parameterTypes   A list describing the parameters of the procedure.
-         * @param argumentAreaSize The size in byte needed on the stack frame to store all arguments of the procedure.
-         * @return A ProcedureEntry containing all necessary information from phase 5 manually computed.
          */
-        fun predefinedProcedureEntry(parameterTypes: List<ParameterType>, argumentAreaSize: Int): ProcedureEntry {
-            val procedureEntry = ProcedureEntry(SymbolTable(), parameterTypes)
-            procedureEntry.stackLayout.argumentAreaSize = argumentAreaSize
+        fun predefinedProcedureEntry(vararg parameterTypes: ParameterType): ProcedureEntry {
+            val procedureEntry = ProcedureEntry(SymbolTable(), parameterTypes.toList(), isInternal = true)
+            procedureEntry.stackLayout.argumentAreaSize = parameterTypes.size
+            parameterTypes.forEachIndexed { index, parameter ->
+                parameter.offset = index
+            }
             return procedureEntry
         }
     }

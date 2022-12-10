@@ -18,9 +18,8 @@ class SymbolTable(val upperLevel: SymbolTable? = null) {
      * @param name  The name of the symbol that is entered.
      * @param entry The entry for the new symbol.
      */
-    fun enter(name: Identifier, entry: Entry) {
-        entries.putIfAbsent(name, entry)
-    }
+    fun enter(name: Identifier, entry: Entry): Boolean =
+        entries.putIfAbsent(name, entry) == null
 
     /**
      * Looks for the symbol defined with the given name.
@@ -42,8 +41,8 @@ class SymbolTable(val upperLevel: SymbolTable? = null) {
         if (entries.isEmpty()) string += "    <empty>\n"
         else {
             string += entries.toSortedMap(compareBy { it.toString() })
-                    .map { (key, value) -> String.format("    %-15s --> %s\n", key, value) }
-                    .joinToString(separator = "")
+                .map { (key, value) -> String.format("    %-15s --> %s\n", key, value) }
+                .joinToString(separator = "")
         }
         if (upperLevel != null) string += upperLevel.toString(level + 1)
         return string

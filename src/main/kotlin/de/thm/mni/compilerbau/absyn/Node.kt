@@ -8,7 +8,8 @@ import de.thm.mni.compilerbau.utils.StringOps.indented
  *
  * Every part of the AST has to extend this class.
  */
-sealed class Node(@JvmField var position: Range? = null) {
+sealed class Node {
+    lateinit var position: Range
 
     companion object {
 
@@ -20,5 +21,10 @@ sealed class Node(@JvmField var position: Range? = null) {
         }
 
         fun formatAst(name: String, vararg arguments: Any) = formatAst(name, arguments.map(Any::toString).toList())
+
+        fun <N : Node> N.withPosition(range: Range): N {
+            this.position = range
+            return this
+        }
     }
 }
