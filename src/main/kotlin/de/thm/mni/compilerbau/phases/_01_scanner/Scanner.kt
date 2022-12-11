@@ -54,8 +54,8 @@ class Scanner(private val file: File, options: CommandLineOptions) : Closeable {
         }
         val secondChar = getchar()
         if (secondChar != '/'.code) {
-            ungetchar(firstChar)
             ungetchar(secondChar)
+            ungetchar(firstChar)
             return false
         }
         var current: Int
@@ -99,8 +99,8 @@ class Scanner(private val file: File, options: CommandLineOptions) : Closeable {
 
 
     private fun consumeAssignmentVariant(
-        followedByAssignment: TokenType,
-        notFollowedByAssignment: TokenType
+        notFollowedByAssignment: TokenType,
+        followedByAssignment: TokenType
     ): Token {
         val nextChar = getchar()
         return if (nextChar.toChar() == '=') createToken(followedByAssignment)
@@ -171,7 +171,7 @@ class Scanner(private val file: File, options: CommandLineOptions) : Closeable {
             throw LexicalError(currentRange(), "Unclosed character literal.")
         }
 
-        return createToken(TokenType.INTEGER, result)
+        return createToken(TokenType.INTEGER, result.code)
     }
 
 
