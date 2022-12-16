@@ -13,6 +13,6 @@ import de.thm.mni.compilerbau.table.Identifier
  * @param procedureName The identifier of the called procedure.
  * @param arguments     The list of expressions, whose values will be passed to the procedure.
  */
-class CallStatement(val procedureName: Identifier, val arguments: List<Expression>) : Statement() {
+class CallStatement(val procedureName: Identifier, val arguments: List<Argument>) : Statement() {
     override fun toString() = formatAst("CallStatement", procedureName, formatAst("Arguments", *arguments.toTypedArray()))
 }

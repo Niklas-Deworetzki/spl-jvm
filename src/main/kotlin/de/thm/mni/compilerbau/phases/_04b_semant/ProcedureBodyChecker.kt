@@ -77,13 +77,13 @@ object ProcedureBodyChecker : Pass() {
 
                 if (parameterCount == argumentCount) {
                     targetEntry.parameterTypes.zip(statement.arguments).forEach { (parameter, argument) ->
-                        checker.verify(argument)
-                        if (parameter.isReference && argument !is VariableExpression) {
+                        checker.verify(argument.value)
+                        if (parameter.isReference && argument.value !is VariableExpression) {
                             reportError(argument.position, "Variable is required for reference parameters.")
                         }
 
                         val isCorrectArgumentType =
-                            argument.dataType === PrimitiveType.Bottom || argument.dataType == parameter.type
+                            argument.value.dataType === PrimitiveType.Bottom || argument.value.dataType == parameter.type
                         if (!isCorrectArgumentType) {
                             reportError(argument.position, "Wrong type for argument.")
                         }

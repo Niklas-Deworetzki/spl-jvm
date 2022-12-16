@@ -147,7 +147,7 @@ class Parser(scanner: Scanner, val options: CommandLineOptions) : AbstractParser
                 advance()
                 val arguments = parseSepList(COMMA, PAR_R, ::parseExpression)
                 token(SEMIC)
-                finishParsing(CallStatement(name, arguments))
+                finishParsing(CallStatement(name, arguments.map { Argument(it).withPosition(it.position) }))
             } else {
                 val target = parseArrayAccesses(NamedVariable(name).withPosition(current.range))
                 token(ASSIGN)
