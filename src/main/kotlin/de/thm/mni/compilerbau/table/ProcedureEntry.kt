@@ -2,7 +2,6 @@ package de.thm.mni.compilerbau.table
 
 import de.thm.mni.compilerbau.phases._05_varalloc.StackLayout
 import java.util.*
-import kotlin.properties.Delegates
 
 /**
  * Represents the table entry for procedure declarations in SPL.
@@ -18,10 +17,8 @@ class ProcedureEntry(
     val parameterTypes: List<ParameterType>,
     val isInternal: Boolean = false
 ) : Entry {
-    val stackLayout: StackLayout = StackLayout()
+    lateinit var stackLayout: StackLayout
 
-    var referencePoolOffset by Delegates.notNull<Int>()
-    var referencePoolSize by Delegates.notNull<Int>()
 
     override fun toString() = "proc: (${
         parameterTypes.joinToString(", ", transform = Objects::toString)
@@ -40,12 +37,7 @@ class ProcedureEntry(
          * @param parameterTypes   A list describing the parameters of the procedure.
          */
         fun predefinedProcedureEntry(vararg parameterTypes: ParameterType): ProcedureEntry {
-            val procedureEntry = ProcedureEntry(SymbolTable(), parameterTypes.toList(), isInternal = true)
-            procedureEntry.stackLayout.argumentAreaSize = parameterTypes.size
-            parameterTypes.forEachIndexed { index, parameter ->
-                parameter.offset = index
-            }
-            return procedureEntry
+            return ProcedureEntry(SymbolTable(), parameterTypes.toList(), isInternal = true)
         }
     }
 }

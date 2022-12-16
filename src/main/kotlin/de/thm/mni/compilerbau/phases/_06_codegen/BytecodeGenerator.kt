@@ -10,9 +10,9 @@ import de.thm.mni.compilerbau.types.ArrayType
 import de.thm.mni.compilerbau.types.PrimitiveType
 import de.thm.mni.compilerbau.utils.SplJvmDefinitions
 import de.thm.mni.compilerbau.utils.SplJvmDefinitions.javaTypeDescriptor
-import jdk.internal.org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
+import org.objectweb.asm.Opcodes.*
 import java.util.EnumMap
 
 class BytecodeGenerator(val options: CommandLineOptions, val program: Program, val table: SymbolTable) {
@@ -69,7 +69,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             Object::class.javaTypeDescriptor(), // Inherits from object.
             emptyArray() // No interfaces.
         )
-        classWriter.visitSource(options.inputFile!!.name, null)
+        classWriter.visitSource(options.inputFile.name, null)
 
         for (procedure in program.declarations.filterIsInstance<ProcedureDeclaration>()) {
             val entry = table.lookup(procedure.name) as ProcedureEntry
@@ -171,7 +171,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             val referenceArguments = mutableListOf<ReferenceArgument>()
 
             for ((parameter, argument) in targetEntry.parameterTypes.zip(statement.arguments)) {
-                generateExpression(argument)
+                generateExpression(argument.value)
 
                 if (parameter.isReferenceInteger()) { // TODO: Optimize if argument is reference itself.
                     val variable = (argument as VariableExpression).variable

@@ -30,6 +30,9 @@ class SymbolTable(val upperLevel: SymbolTable? = null) {
      */
     fun lookup(name: Identifier): Entry? = entries[name] ?: upperLevel?.lookup(name)
 
+    inline fun <reified E : Entry> lookupAs(name: Identifier): E =
+        lookup(name)!! as E
+
     /**
      * Converts the table to a human-readable format.
      *
