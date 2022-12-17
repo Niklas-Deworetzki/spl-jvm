@@ -1,4 +1,4 @@
-package de.thm.mni.compilerbau.utils
+package de.thm.mni.compilerbau.jvm
 
 import org.objectweb.asm.Type
 import java.util.concurrent.atomic.AtomicInteger

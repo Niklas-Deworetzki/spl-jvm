@@ -1,11 +1,13 @@
 package de.thm.mni.compilerbau.absyn
 
 class Argument(val value: Expression) : Node() {
-    lateinit var promotion: PromotionStrategy
+    lateinit var passingMode: PassingMode
 
     override fun toString(): String = formatAst("Argument", value)
 
-    sealed interface PromotionStrategy
-    object NoPromotion : PromotionStrategy
-    class Promote(val poolIndex: Int) : PromotionStrategy
+    sealed interface PassingMode
+    object ByValue : PassingMode
+    object ByReferenceInteger : PassingMode
+    object ByReferenceArray : PassingMode
+    class PromoteToReference(val referencePoolIndex: Int) : PassingMode
 }

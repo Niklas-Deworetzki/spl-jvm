@@ -2,7 +2,7 @@ package de.thm.mni.compilerbau.table
 
 import de.thm.mni.compilerbau.types.PrimitiveType
 import de.thm.mni.compilerbau.types.Type
-import de.thm.mni.compilerbau.utils.SplJvmDefinitions
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions
 
 /**
  * Contains the information about a parameter, that are necessary when calling the associated procedure.

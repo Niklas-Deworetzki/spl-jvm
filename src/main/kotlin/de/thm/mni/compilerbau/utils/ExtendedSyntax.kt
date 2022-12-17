@@ -1,7 +1,6 @@
 package de.thm.mni.compilerbau.utils
 
 import de.thm.mni.compilerbau.absyn.*
-import de.thm.mni.compilerbau.table.VariableEntry
 
 object ExtendedSyntax {
 

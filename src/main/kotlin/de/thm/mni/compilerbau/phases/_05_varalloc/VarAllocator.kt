@@ -2,11 +2,13 @@ package de.thm.mni.compilerbau.phases._05_varalloc
 
 import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.absyn.*
+import de.thm.mni.compilerbau.jvm.InternalType
 import de.thm.mni.compilerbau.phases._05_varalloc.AllocationPrettyPrinter.formatVars
 import de.thm.mni.compilerbau.table.ParameterType
 import de.thm.mni.compilerbau.table.ProcedureEntry
 import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.table.VariableEntry
+import de.thm.mni.compilerbau.types.ArrayType
 import de.thm.mni.compilerbau.utils.ExtendedSyntax.asVariable
 import de.thm.mni.compilerbau.utils.ExtendedSyntax.forEachStatement
 import kotlin.math.max
@@ -32,21 +34,20 @@ class VarAllocator(private val options: CommandLineOptions) {
     private fun computeStackLayout(declaration: ProcedureDeclaration, entry: ProcedureEntry) {
         val referencePoolSize = ArgumentCalculator(declaration, entry.localTable).computeReferencePoolSize()
 
-        var currentStackOffset = 0
+        val arguments = mutableListOf<InternalType>()
         for (parameter in declaration.parameters) {
             val localVariable = entry.localTable.lookupAs<VariableEntry>(parameter.name)
-            localVariable.offset = currentStackOffset++
+            localVariable.offset = arguments.size
+            arguments.add(InternalType.of(localVariable))
         }
+        val variables = mutableListOf<InternalType>()
         for (variable in declaration.variables) {
             val localVariable = entry.localTable.lookupAs<VariableEntry>(variable.name)
-            localVariable.offset = currentStackOffset++
+            localVariable.offset = arguments.size + variables.size
+            variables.add(InternalType.of(localVariable))
         }
 
-        entry.stackLayout = StackLayout(
-            declaration.parameters.size,
-            declaration.variables.size,
-            referencePoolSize
-        )
+        entry.stackLayout = StackLayout(arguments, variables, referencePoolSize)
     }
 
     private class ArgumentCalculator(val declaration: ProcedureDeclaration, val scope: SymbolTable) {
@@ -59,15 +60,25 @@ class VarAllocator(private val options: CommandLineOptions) {
 
         private fun evalStatement(statement: Statement) {
             if (statement is CallStatement) {
-                val calledProcedure = scope.upperLevel?.lookup(statement.procedureName)!! as ProcedureEntry
+                val calledProcedure = scope.upperLevel?.lookupAs<ProcedureEntry>(statement.procedureName)!!
 
                 var requiredPromotions = 0
                 for (index in statement.arguments.indices) {
-                    if (argumentRequiresPromotion(statement, calledProcedure, index)) {
-                        statement.arguments[index].promotion = Argument.Promote(requiredPromotions)
-                        requiredPromotions += 1
-                    } else {
-                        statement.arguments[index].promotion = Argument.NoPromotion
+                    val parameterIsReference = calledProcedure.parameterTypes[index].isReference
+                    val argument = statement.arguments[index]
+
+                    argument.passingMode = when {
+                        parameterIsReference && argumentRequiresPromotion(argument) ->
+                            Argument.PromoteToReference(requiredPromotions++)
+
+                        parameterIsReference && argument.value.dataType is ArrayType ->
+                            Argument.ByReferenceArray
+
+                        parameterIsReference ->
+                            Argument.ByReferenceInteger
+
+                        else ->
+                            Argument.ByValue
                     }
                 }
                 this.simultaneousArgumentsRequiringPromotion =
@@ -75,19 +86,9 @@ class VarAllocator(private val options: CommandLineOptions) {
             }
         }
 
-        private fun argumentRequiresPromotion(
-            call: CallStatement,
-            calledProcedure: ProcedureEntry,
-            index: Int
-        ): Boolean {
-            val parameterIsReference = calledProcedure.parameterTypes[index].isReference
-            if (parameterIsReference) {
-                val argument = call.arguments[index].asVariable()
-                if (argument is NamedVariable && !scope.lookupAs<VariableEntry>(argument.name).isReference) {
-                    return true
-                }
-            }
-            return false
+        private fun argumentRequiresPromotion(argument: Argument): Boolean {
+            val variable = argument.asVariable()
+            return variable is NamedVariable && !scope.lookupAs<VariableEntry>(variable.name).isReference
         }
     }
 }

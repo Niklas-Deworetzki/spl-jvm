@@ -8,8 +8,9 @@ import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.table.VariableEntry
 import de.thm.mni.compilerbau.types.ArrayType
 import de.thm.mni.compilerbau.types.PrimitiveType
-import de.thm.mni.compilerbau.utils.SplJvmDefinitions
-import de.thm.mni.compilerbau.utils.SplJvmDefinitions.javaTypeDescriptor
+import de.thm.mni.compilerbau.utils.ExtendedSyntax.asVariable
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.javaTypeDescriptor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
@@ -82,7 +83,8 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
 
     private inner class ProcedureGenerator(val procedure: ProcedureDeclaration, val entry: ProcedureEntry) {
-        private val scope: SymbolTable = entry.localTable
+        private val scope = entry.localTable
+        private val layout = entry.stackLayout
         private val methodWriter = classWriter.visitMethod(
             ACC_PRIVATE + ACC_STATIC,
             procedure.name.toString(),
@@ -167,20 +169,31 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             } else TODO()
 
         fun generateCallStatement(statement: CallStatement) {
-            val targetEntry = scope.upperLevel?.lookup(statement.procedureName)!! as ProcedureEntry
-            val referenceArguments = mutableListOf<ReferenceArgument>()
+            val targetEntry = scope.upperLevel?.lookupAs<ProcedureEntry>(statement.procedureName)!!
 
-            for ((parameter, argument) in targetEntry.parameterTypes.zip(statement.arguments)) {
-                generateExpression(argument.value)
+            val promotedReferenceArguments = mutableListOf<Argument>()
+            for (argument in statement.arguments) {
+                when (argument.passingMode) {
+                    is Argument.ByValue -> // Simply evaluate argument.
+                        generateExpression(argument.value)
 
-                if (parameter.isReferenceInteger()) { // TODO: Optimize if argument is reference itself.
-                    val variable = (argument as VariableExpression).variable
+                    is Argument.ByReferenceArray -> // Places array as reference on stack.
+                        loadVariable(argument.asVariable())
 
-                    val referenceOffset = referenceArguments.size + entry.referencePoolOffset
-                    referenceArguments.add(ReferenceArgument(referenceOffset, variable))
+                    is Argument.ByReferenceInteger -> { // Argument is already reference.
+                        val variable = argument.asVariable() as NamedVariable
+                        methodWriter.visitVarInsn(ALOAD, scope.lookupAs<VariableEntry>(variable.name).offset)
+                    }
 
-                    referenceSet(referenceOffset) // Place value in reference pool.
-                    methodWriter.visitVarInsn(ALOAD, referenceOffset) // Load reference from pool.
+                    is Argument.PromoteToReference -> {
+                        promotedReferenceArguments.add(argument)
+                        val referencePoolIndex =
+                            (argument.passingMode as Argument.PromoteToReference).referencePoolIndex
+
+                        generateExpression(argument.value) // Evaluate argument
+                        referenceSet(layout.poolIndexToOffset(referencePoolIndex)) // Store in reference from pool
+                        methodWriter.visitVarInsn(ALOAD, layout.poolIndexToOffset(referencePoolIndex)) // Get from pool
+                    }
                 }
             }
 
@@ -192,10 +205,13 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
                 false // Is not defined on interface.
             )
 
-            // Update values of arguments here.
-            for (referenceArgument in referenceArguments) {
-                storeVariable(referenceArgument.argument) {
-                    referenceGet(referenceArgument.referenceCacheOffset)
+            // Update values of promoted arguments.
+            for (referenceArgument in promotedReferenceArguments) {
+                val referencePoolIndex =
+                    (referenceArgument.passingMode as Argument.PromoteToReference).referencePoolIndex
+
+                storeVariable(referenceArgument.asVariable()) {
+                    referenceGet(layout.poolIndexToOffset(referencePoolIndex))
                 }
             }
         }
@@ -238,7 +254,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
         fun loadVariable(variable: Variable): Unit = when (variable) {
             is NamedVariable -> {
-                val entry = scope.lookup(variable.name)!! as VariableEntry
+                val entry = scope.lookupAs<VariableEntry>(variable.name)
 
                 if (entry.isReferenceInteger()) {
                     referenceGet(entry.offset)
@@ -261,7 +277,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
         fun storeVariable(variable: Variable, generateStoredValue: () -> Unit) {
             when (variable) {
                 is NamedVariable -> {
-                    val entry = scope.lookup(variable.name)!! as VariableEntry
+                    val entry = scope.lookupAs<VariableEntry>(variable.name)
 
                     generateStoredValue()
                     if (entry.isReference) {
@@ -273,6 +289,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
                 is ArrayAccess -> {
                     loadVariable(variable.array)
+                    generateExpression(variable.index)
                     generateStoredValue()
                     methodWriter.visitInsn(IASTORE)
                 }
@@ -319,8 +336,5 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
         this.lhs.dataType == PrimitiveType.Int && this.rhs.dataType == PrimitiveType.Int
 
     private fun VariableEntry.isReferenceInteger(): Boolean =
-        this.isReference && this.type is PrimitiveType
-
-    private fun ParameterType.isReferenceInteger(): Boolean =
         this.isReference && this.type is PrimitiveType
 }
