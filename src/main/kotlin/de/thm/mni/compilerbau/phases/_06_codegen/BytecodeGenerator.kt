@@ -61,7 +61,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
     fun thisClassDescriptor(): String = GENERATED_CLASS_NAME
 
 
-    val classWriter = ClassWriter(0)
+    val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES)
 
     fun generateCode() {
         classWriter.visit(
