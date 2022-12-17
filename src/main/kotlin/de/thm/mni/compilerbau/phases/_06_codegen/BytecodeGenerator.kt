@@ -2,19 +2,19 @@ package de.thm.mni.compilerbau.phases._06_codegen
 
 import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.absyn.*
-import de.thm.mni.compilerbau.table.ParameterType
+import de.thm.mni.compilerbau.jvm.JavaTypeDescriptors.javaMethodDescriptor
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.javaInternalName
 import de.thm.mni.compilerbau.table.ProcedureEntry
 import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.table.VariableEntry
 import de.thm.mni.compilerbau.types.ArrayType
 import de.thm.mni.compilerbau.types.PrimitiveType
 import de.thm.mni.compilerbau.utils.ExtendedSyntax.asVariable
-import de.thm.mni.compilerbau.jvm.SplJvmDefinitions
-import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.javaTypeDescriptor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
-import java.util.EnumMap
+import java.util.*
 
 class BytecodeGenerator(val options: CommandLineOptions, val program: Program, val table: SymbolTable) {
 
@@ -67,7 +67,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
         classWriter.visit(
             GENERATED_BYTECODE_VERSION, GENERATED_FLAGS, thisClassDescriptor(),
             null, // No signature.
-            Object::class.javaTypeDescriptor(), // Inherits from object.
+            Object::class.javaInternalName(), // Inherits from object.
             emptyArray() // No interfaces.
         )
         classWriter.visitSource(options.inputFile.name, null)

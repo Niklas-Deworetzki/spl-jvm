@@ -24,12 +24,6 @@ class ProcedureEntry(
         parameterTypes.joinToString(", ", transform = Objects::toString)
     })"
 
-    fun javaMethodDescriptor(): String =
-        parameterTypes.joinToString(
-            prefix = "(", postfix = ")V",
-            transform = ParameterType::javaTypeDescriptor
-        )
-
     companion object {
         /**
          * This static method is reserved for the creation of entries for predefined procedures.

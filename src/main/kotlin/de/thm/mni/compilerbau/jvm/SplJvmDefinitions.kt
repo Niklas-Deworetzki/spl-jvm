@@ -6,8 +6,11 @@ import kotlin.reflect.KClass
 
 object SplJvmDefinitions {
 
-    fun <T : Any> KClass<T>.javaTypeDescriptor(): String =
+    fun <T : Any> KClass<T>.javaInternalName(): String =
         Type.getInternalName(this.java)
+
+    fun <T : Any> KClass<T>.javaTypeDescriptor(): String =
+        Type.getDescriptor(this.java)
 
     val REFERENCE_INTEGER_CLASS: String = AtomicInteger::class.javaTypeDescriptor()
 
