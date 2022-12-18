@@ -10,6 +10,7 @@ import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.LIBRARY_CLASS_NAME
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.javaInternalName
 import de.thm.mni.compilerbau.phases._06_codegen.OptimizingIntegerPush.push
+import de.thm.mni.compilerbau.table.Identifier.Companion.IDENTIFIER_MAIN
 import de.thm.mni.compilerbau.table.ProcedureEntry
 import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.table.VariableEntry
@@ -60,10 +61,10 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             }
             result
         }
+
+        private fun procedureVisibility(procedure: ProcedureDeclaration): Int =
+            if (procedure.name == IDENTIFIER_MAIN) ACC_PUBLIC else ACC_PRIVATE
     }
-
-    fun thisClassDescriptor(): String = GENERATED_CLASS_NAME
-
 
     val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES)
 
@@ -91,7 +92,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
         private val layout = entry.stackLayout
 
         private val methodWriter = classWriter.visitMethod(
-            ACC_PRIVATE + ACC_STATIC,
+            procedureVisibility(procedure) + ACC_STATIC,
             procedure.name.toString(),
             entry.javaMethodDescriptor(),
             null,
@@ -257,7 +258,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
             methodWriter.visitMethodInsn(
                 INVOKESTATIC,
-                if (targetEntry.isInternal) LIBRARY_CLASS_NAME else thisClassDescriptor(),
+                if (targetEntry.isInternal) LIBRARY_CLASS_NAME else GENERATED_CLASS_NAME,
                 statement.procedureName.toString(),
                 targetEntry.javaMethodDescriptor(),
                 false // Is not defined on interface.
