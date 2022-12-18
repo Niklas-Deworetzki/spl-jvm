@@ -1,6 +1,8 @@
 package de.thm.mni.compilerbau.phases._06_codegen
 
 import de.thm.mni.compilerbau.jvm.JavaTypeDescriptors.javaTypeDescriptor
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.REFERENCE_INTEGER_CLASS_NAME
+import de.thm.mni.compilerbau.phases._05_varalloc.StackLayout
 import de.thm.mni.compilerbau.phases._06_codegen.OptimizingIntegerPush.push
 import de.thm.mni.compilerbau.table.VariableEntry
 import de.thm.mni.compilerbau.types.ArrayType
@@ -9,6 +11,21 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 
 class VariableInitializer(private val methodWriter: MethodVisitor) {
+
+    fun initializeReferencePool(layout: StackLayout) {
+        for (offset in layout.referencePoolOffsets()) {
+            methodWriter.visitTypeInsn(NEW, REFERENCE_INTEGER_CLASS_NAME)
+            methodWriter.visitInsn(DUP)
+            methodWriter.visitMethodInsn(
+                INVOKESPECIAL,
+                REFERENCE_INTEGER_CLASS_NAME,
+                "<init>",
+                "()V",
+                false
+            )
+            methodWriter.visitVarInsn(ASTORE, offset)
+        }
+    }
 
     fun initialize(variable: VariableEntry) {
         if (variable.type is ArrayType) {

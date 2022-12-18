@@ -15,8 +15,12 @@ class StackLayout(
     /**
      * @return The total size of the stack frame described by this object.
      */
-    fun frameSize(): Int = TODO()
+    fun frameSize(): Int = arguments.size + localVariables.size + referencePoolSize
 
-    fun poolIndexToOffset(referencePoolIndex: Int): Int = TODO()
+    fun poolIndexToOffset(referencePoolIndex: Int): Int = arguments.size + localVariables.size + referencePoolIndex
 
+    fun referencePoolOffsets(): IntRange {
+        val poolOffset = arguments.size + localVariables.size
+        return poolOffset until poolOffset + referencePoolSize
+    }
 }

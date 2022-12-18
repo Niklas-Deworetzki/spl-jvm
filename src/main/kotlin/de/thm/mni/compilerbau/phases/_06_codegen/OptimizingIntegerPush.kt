@@ -5,8 +5,8 @@ import org.objectweb.asm.Opcodes.*
 
 object OptimizingIntegerPush {
 
-    private val BYTE_RANGE = Byte.MIN_VALUE.rangeTo(Byte.MAX_VALUE)
-    private val SHORT_RANGE = Short.MIN_VALUE.rangeTo(Short.MAX_VALUE)
+    private val BYTE_RANGE = Byte.MIN_VALUE..Byte.MAX_VALUE
+    private val SHORT_RANGE = Short.MIN_VALUE..Short.MAX_VALUE
 
     fun MethodVisitor.push(value: Int): Unit = when (value) {
         0 -> visitInsn(ICONST_0)

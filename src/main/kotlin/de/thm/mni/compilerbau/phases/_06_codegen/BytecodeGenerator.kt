@@ -105,12 +105,12 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             methodWriter.visitLabel(beginOfProcedure)
             run {
                 val initializer = VariableInitializer(methodWriter)
+                initializer.initializeReferencePool(layout)
                 for (variable in procedure.variables) {
                     initializer.initialize(scope.lookupAs(variable.name))
                 }
 
                 // TODO: Check array sizes (on demand)
-                // TODO: Reference pool.
                 for (statement in procedure.body) {
                     generateStatement(statement)
                 }
@@ -317,7 +317,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             methodWriter.visitVarInsn(ALOAD, offset)
             methodWriter.visitMethodInsn(
                 INVOKEVIRTUAL,
-                SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR,
+                SplJvmDefinitions.REFERENCE_INTEGER_CLASS_NAME,
                 SplJvmDefinitions.REFERENCE_INTEGER_METHOD_GET.name,
                 SplJvmDefinitions.REFERENCE_INTEGER_METHOD_GET.descriptor,
                 false
@@ -329,7 +329,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             methodWriter.visitInsn(SWAP)
             methodWriter.visitMethodInsn(
                 INVOKEVIRTUAL,
-                SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR,
+                SplJvmDefinitions.REFERENCE_INTEGER_CLASS_NAME,
                 SplJvmDefinitions.REFERENCE_INTEGER_METHOD_SET.name,
                 SplJvmDefinitions.REFERENCE_INTEGER_METHOD_SET.descriptor,
                 false
