@@ -12,7 +12,11 @@ object SplJvmDefinitions {
     fun <T : Any> KClass<T>.javaTypeDescriptor(): String =
         Type.getDescriptor(this.java)
 
-    val REFERENCE_INTEGER_CLASS: String = AtomicInteger::class.javaTypeDescriptor()
+    private val REFERENCE_INTEGER_CLASS = AtomicInteger::class
+
+    val REFERENCE_INTEGER_CLASS_DESCRIPTOR: String = REFERENCE_INTEGER_CLASS.javaTypeDescriptor()
+
+    val REFERENCE_INTEGER_CLASS_NAME: String = REFERENCE_INTEGER_CLASS.javaInternalName()
 
     val REFERENCE_INTEGER_METHOD_GET = object : LibraryMethod {
         override val name = "get"

@@ -16,12 +16,12 @@ object JavaTypeDescriptors {
 
     private fun javaTypeDescriptor(parameterType: ParameterType): String =
         if (parameterType.isReference && parameterType.type == PrimitiveType.Int)
-            SplJvmDefinitions.REFERENCE_INTEGER_CLASS
-        else javaTypeDescriptor(parameterType.type)
+            SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR
+        else parameterType.type.javaTypeDescriptor()
 
 
-    private fun javaTypeDescriptor(type: Type): String = when (type) {
-        is ArrayType -> "[" + javaTypeDescriptor(type.baseType)
+    fun Type.javaTypeDescriptor(): String = when (this) {
+        is ArrayType -> "[" + baseType.javaTypeDescriptor()
         PrimitiveType.Int -> "I"
         PrimitiveType.Bool -> "Z"
         PrimitiveType.Bottom -> "V"

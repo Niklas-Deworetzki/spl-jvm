@@ -25,6 +25,8 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
         const val LIBRARY_CLASS_NAME: String = "LibSpl"
 
+        private const val ASM_AUTO_COMPUTE = -1
+
         private val ARITHMETIC_OPCODES = mapOf(
             BinaryExpression.Operator.ADD to IADD,
             BinaryExpression.Operator.SUB to ISUB,
@@ -85,6 +87,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
     private inner class ProcedureGenerator(val procedure: ProcedureDeclaration, val entry: ProcedureEntry) {
         private val scope = entry.localTable
         private val layout = entry.stackLayout
+
         private val methodWriter = classWriter.visitMethod(
             ACC_PRIVATE + ACC_STATIC,
             procedure.name.toString(),
@@ -93,15 +96,29 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             emptyArray()
         )
 
+        private val beginOfProcedure = Label()
+        private val endOfProcedure = Label()
+
         fun generateCode() {
             methodWriter.visitCode() // Start generating code.
-            // TODO: Check array sizes (on demand)
-            // TODO: Allocate local arrays.
-            // TODO: Reference pool.
-            for (statement in procedure.body) {
-                generateStatement(statement)
+
+            methodWriter.visitLabel(beginOfProcedure)
+            run {
+                val initializer = VariableInitializer(methodWriter)
+                for (variable in procedure.variables) {
+                    initializer.initialize(scope.lookupAs(variable.name))
+                }
+
+                // TODO: Check array sizes (on demand)
+                // TODO: Reference pool.
+                for (statement in procedure.body) {
+                    generateStatement(statement)
+                }
+                methodWriter.visitInsn(RETURN)
             }
-            methodWriter.visitInsn(RETURN)
+            methodWriter.visitLabel(endOfProcedure)
+
+            methodWriter.visitMaxs(ASM_AUTO_COMPUTE, ASM_AUTO_COMPUTE)
             methodWriter.visitEnd()
         }
 
@@ -300,7 +317,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             methodWriter.visitVarInsn(ALOAD, offset)
             methodWriter.visitMethodInsn(
                 INVOKEVIRTUAL,
-                SplJvmDefinitions.REFERENCE_INTEGER_CLASS,
+                SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR,
                 SplJvmDefinitions.REFERENCE_INTEGER_METHOD_GET.name,
                 SplJvmDefinitions.REFERENCE_INTEGER_METHOD_GET.descriptor,
                 false
@@ -312,7 +329,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             methodWriter.visitInsn(SWAP)
             methodWriter.visitMethodInsn(
                 INVOKEVIRTUAL,
-                SplJvmDefinitions.REFERENCE_INTEGER_CLASS,
+                SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR,
                 SplJvmDefinitions.REFERENCE_INTEGER_METHOD_SET.name,
                 SplJvmDefinitions.REFERENCE_INTEGER_METHOD_SET.descriptor,
                 false
