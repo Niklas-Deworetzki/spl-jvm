@@ -40,4 +40,16 @@ class CommandLineOptions {
             "Supported values are: \${COMPLETION-CANDIDATES}"]
     )
     var debug: DebugPhase? = null
+
+    @Option(
+        names = ["--class"],
+        description = ["Generates a .class file instead of an executable .jar"]
+    )
+    var generateClass: Boolean = false
+
+    @Option(
+        names = ["--public"],
+        description = ["Bytecode generated for procedures in placed in public methods."]
+    )
+    var makePublic: Boolean = false
 }

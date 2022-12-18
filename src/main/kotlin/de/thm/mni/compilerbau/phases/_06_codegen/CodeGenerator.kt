@@ -24,7 +24,19 @@ class CodeGenerator(private val options: CommandLineOptions) {
         val bytecodeGenerator = BytecodeGenerator(options, program, table)
         bytecodeGenerator.generateCode()
 
-        generateJar(options.outputFile ?: File("$GENERATED_CLASS_NAME.jar"), bytecodeGenerator)
+        if (options.generateClass) {
+            val outputFile = options.outputFile ?: File("$GENERATED_CLASS_NAME.class")
+            generateClass(outputFile, bytecodeGenerator)
+        } else {
+            val outputFile = options.outputFile ?: File("$GENERATED_CLASS_NAME.jar")
+            generateJar(outputFile, bytecodeGenerator)
+        }
+    }
+
+    private fun generateClass(file: File, bytecodeGenerator: BytecodeGenerator) {
+        FileOutputStream(file).use {
+            it.write(bytecodeGenerator.classWriter.toByteArray())
+        }
     }
 
     private fun generateJar(file: File, bytecodeGenerator: BytecodeGenerator) {

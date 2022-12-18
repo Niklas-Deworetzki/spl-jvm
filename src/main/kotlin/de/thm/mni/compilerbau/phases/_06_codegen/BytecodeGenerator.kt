@@ -61,9 +61,12 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
             }
             result
         }
+    }
 
-        private fun procedureVisibility(procedure: ProcedureDeclaration): Int =
-            if (procedure.name == IDENTIFIER_MAIN) ACC_PUBLIC else ACC_PRIVATE
+    private fun procedureVisibility(procedure: ProcedureDeclaration): Int = when {
+        options.makePublic -> ACC_PUBLIC
+        procedure.name == IDENTIFIER_MAIN -> ACC_PUBLIC
+        else -> ACC_PRIVATE
     }
 
     val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES)
@@ -116,7 +119,6 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
                 }
                 methodWriter.visitLabel(endOfPrologue)
 
-                // TODO: Check array sizes (on demand)
                 for (statement in procedure.body) {
                     generateStatement(statement)
                 }
