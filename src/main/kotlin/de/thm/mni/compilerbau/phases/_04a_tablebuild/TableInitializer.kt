@@ -1,6 +1,5 @@
 package de.thm.mni.compilerbau.phases._04a_tablebuild
 
-import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.table.*
 import de.thm.mni.compilerbau.types.PrimitiveType
 
@@ -10,18 +9,18 @@ internal object TableInitializer {
      *
      * @return A new instance of the symbol table representing the global definition scope.
      */
-    fun initializeGlobalTable(options: CommandLineOptions): SymbolTable {
+    fun initializeGlobalTable(): SymbolTable {
         val table = SymbolTable()
-        enterPredefinedTypes(table, options)
-        enterPredefinedProcedures(table, options)
+        enterPredefinedTypes(table)
+        enterPredefinedProcedures(table)
         return table
     }
 
-    private fun enterPredefinedTypes(table: SymbolTable, options: CommandLineOptions) {
+    private fun enterPredefinedTypes(table: SymbolTable) {
         table.enter(Identifier("int"), TypeEntry(PrimitiveType.Int))
     }
 
-    private fun enterPredefinedProcedures(table: SymbolTable, options: CommandLineOptions) {
+    private fun enterPredefinedProcedures(table: SymbolTable) {
         // printi(i: int)
         table.enter(
             Identifier("printi"),

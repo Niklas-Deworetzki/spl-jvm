@@ -5,6 +5,8 @@ import de.thm.mni.compilerbau.absyn.*
 import de.thm.mni.compilerbau.jvm.JavaTypeDescriptors.javaMethodDescriptor
 import de.thm.mni.compilerbau.jvm.JavaTypeDescriptors.javaTypeDescriptor
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.GENERATED_CLASS_NAME
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.LIBRARY_CLASS_NAME
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.javaInternalName
 import de.thm.mni.compilerbau.phases._06_codegen.OptimizingIntegerPush.push
@@ -24,9 +26,6 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
     companion object {
         const val GENERATED_BYTECODE_VERSION: Int = V1_8
         const val GENERATED_FLAGS: Int = ACC_PUBLIC + ACC_FINAL
-        const val GENERATED_CLASS_NAME: String = "Spl"
-
-        const val LIBRARY_CLASS_NAME: String = "LibSpl"
 
         private const val ASM_AUTO_COMPUTE = -1
 
@@ -70,7 +69,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
     fun generateCode() {
         classWriter.visit(
-            GENERATED_BYTECODE_VERSION, GENERATED_FLAGS, thisClassDescriptor(),
+            GENERATED_BYTECODE_VERSION, GENERATED_FLAGS, GENERATED_CLASS_NAME,
             null, // No signature.
             Object::class.javaInternalName(), // Inherits from object.
             emptyArray() // No interfaces.

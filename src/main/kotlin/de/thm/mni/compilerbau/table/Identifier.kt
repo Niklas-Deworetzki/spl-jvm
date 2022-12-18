@@ -12,4 +12,8 @@ class Identifier(identifier: String) {
     override fun hashCode(): Int = identifier.hashCode()
     override fun equals(other: Any?): Boolean = other is Identifier && other.identifier === identifier
     override fun toString(): String = identifier
+
+    companion object {
+        val IDENTIFIER_MAIN = Identifier("main")
+    }
 }

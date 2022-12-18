@@ -6,6 +6,10 @@ import kotlin.reflect.KClass
 
 object SplJvmDefinitions {
 
+    const val GENERATED_CLASS_NAME: String = "Spl"
+
+    const val LIBRARY_CLASS_NAME: String = "SplLib"
+
     fun <T : Any> KClass<T>.javaInternalName(): String =
         Type.getInternalName(this.java)
 

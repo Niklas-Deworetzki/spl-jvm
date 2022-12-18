@@ -5,6 +5,7 @@ import de.thm.mni.compilerbau.absyn.*
 import de.thm.mni.compilerbau.phases.Pass
 import de.thm.mni.compilerbau.reporting.Message.Companion.quoted
 import de.thm.mni.compilerbau.table.*
+import de.thm.mni.compilerbau.table.Identifier.Companion.IDENTIFIER_MAIN
 import de.thm.mni.compilerbau.types.ArrayType
 import de.thm.mni.compilerbau.types.Type
 
@@ -20,7 +21,7 @@ import de.thm.mni.compilerbau.types.Type
 class TableBuilder(private val options: CommandLineOptions) : Pass() {
 
     fun buildSymbolTable(program: Program): SymbolTable {
-        val globalTable = TableInitializer.initializeGlobalTable(options)
+        val globalTable = TableInitializer.initializeGlobalTable()
         val typeComputation = TypeComputation(this, globalTable)
 
         for (declaration in program.declarations) {
@@ -93,8 +94,6 @@ class TableBuilder(private val options: CommandLineOptions) : Pass() {
         }
 
     companion object {
-        val IDENTIFIER_MAIN = Identifier("main")
-
         /**
          * Prints the local symbol table of a procedure together with a heading-line
          * NOTE: You have to call this after completing the local table to support '--tables'.
