@@ -7,6 +7,7 @@ import de.thm.mni.compilerbau.jvm.JavaTypeDescriptors.javaTypeDescriptor
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.javaInternalName
+import de.thm.mni.compilerbau.phases._06_codegen.OptimizingIntegerPush.push
 import de.thm.mni.compilerbau.table.ProcedureEntry
 import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.table.VariableEntry
@@ -291,7 +292,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
 
         fun generateIntLiteral(expression: IntLiteral) {
-            methodWriter.visitLdcInsn(expression.value)
+            methodWriter.push(expression.value)
         }
 
         fun generateBinaryExpression(expression: BinaryExpression) {
