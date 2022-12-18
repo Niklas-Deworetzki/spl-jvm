@@ -21,7 +21,7 @@ abstract class AbstractParser<P>(private val scanner: Scanner) {
 
     fun parse(): P? {
         val result = try {
-            parserEntry()
+            parseFully(::parserEntry)
         } catch (syntaxError: SyntaxError) {
             null
         }
@@ -166,7 +166,7 @@ abstract class AbstractParser<P>(private val scanner: Scanner) {
      * error limit is exceeded. Otherwise, <code>false</code> is returned.
      */
     private fun reportError(range: Range, expected: List<String>) {
-        reportedErrors.add(SyntaxErrorReport(range, expected));
+        reportedErrors.add(SyntaxErrorReport(range, expected))
     }
 
     protected fun error(range: Range, vararg expected: Any): Nothing {
@@ -174,7 +174,7 @@ abstract class AbstractParser<P>(private val scanner: Scanner) {
         throw Recovery()
     }
 
-    protected fun unrecoverableError(range: Range, vararg expected: Any): Nothing {
+    private fun unrecoverableError(range: Range, vararg expected: Any): Nothing {
         reportError(range, formatExpected(expected))
         throw SyntaxError()
     }

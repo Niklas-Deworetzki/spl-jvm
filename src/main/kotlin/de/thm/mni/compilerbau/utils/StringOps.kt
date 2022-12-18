@@ -13,8 +13,4 @@ object StringOps {
         val indentationPrefix = " ".repeat(indentation)
         return javaLines(this).joinToString("\n") { s -> indentationPrefix + s }
     }
-
-    fun toString(o: Any?): String {
-        return o?.toString() ?: "NULL"
-    }
 }

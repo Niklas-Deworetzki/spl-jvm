@@ -19,5 +19,5 @@ class UnaryExpression(
         MINUS("-")
     }
 
-    override fun toString(): String = formatAst("UnaryExpression", operator, operand)
+    override fun toString(): String = formatAst("UnaryExpression", operator.representation, operand)
 }

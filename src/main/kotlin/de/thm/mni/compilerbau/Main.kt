@@ -11,7 +11,6 @@ import de.thm.mni.compilerbau.phases._06_codegen.CodeGenerator
 import de.thm.mni.compilerbau.reporting.MessageFormatter
 import de.thm.mni.compilerbau.utils.VersionInfo
 import picocli.CommandLine
-import java.io.FileOutputStream
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -43,13 +42,13 @@ private fun showTokens(scanner: Scanner) {
 }
 
 private fun run(options: CommandLineOptions): Int =
-    Scanner(options.inputFile, options).use { scanner ->
+    Scanner(options.inputFile).use { scanner ->
         if (options.debug === CommandLineOptions.DebugPhase.TOKENS) {
             showTokens(scanner)
             return 0
         }
 
-        val parser = Parser(scanner, options)
+        val parser = Parser(scanner)
         val program = parser.parse()
         if (program == null) {
             for (reportedError in parser.reportedErrors) {
@@ -65,11 +64,23 @@ private fun run(options: CommandLineOptions): Int =
             return 0
         }
 
-        val table = TableBuilder(options).buildSymbolTable(program)
-        if (options.debug == CommandLineOptions.DebugPhase.TABLES) return 0
+        val tableBuilder = TableBuilder(options)
+        val table = tableBuilder.buildSymbolTable(program)
+        if (tableBuilder.errors.isNotEmpty()) {
+            for (error in tableBuilder.errors) {
+                println(MessageFormatter.format(error))
+            }
+            return 1
+        } else if (options.debug == CommandLineOptions.DebugPhase.TABLES)
+            return 0
 
         ProcedureBodyChecker.checkProcedures(program, table)
-        if (options.debug === CommandLineOptions.DebugPhase.SEMANT) {
+        if (ProcedureBodyChecker.errors.isNotEmpty()) {
+            for (error in ProcedureBodyChecker.errors) {
+                println(MessageFormatter.format(error))
+            }
+            return 1
+        } else if (options.debug === CommandLineOptions.DebugPhase.SEMANT) {
             println("No semantic errors found!")
             return 0
         }

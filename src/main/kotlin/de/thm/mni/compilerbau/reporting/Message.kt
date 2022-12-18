@@ -1,7 +1,6 @@
 package de.thm.mni.compilerbau.reporting
 
 import de.thm.mni.compilerbau.position.Range
-import de.thm.mni.compilerbau.table.Identifier
 import org.fusesource.jansi.Ansi
 
 /**
@@ -19,26 +18,6 @@ interface Message {
      * Contents of the message.
      */
     fun message(): String
-
-    /**
-     * A [List] of details additionally provided as part of
-     * the message. These provide further information.
-     *
-     *
-     * Details are provided as key-value-pairs with a key describing
-     * some detail and the value being some describing value for it.
-     */
-    fun details(): List<Map.Entry<String, Any?>> {
-        return emptyList()
-    }
-
-    /**
-     * An optional hint message that can aid resolution of an error
-     * described by the message.
-     */
-    fun hint(): String? {
-        return null
-    }
 
     /**
      * A description of the source code associated with the message.

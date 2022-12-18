@@ -22,7 +22,7 @@ import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
 import java.util.*
 
-class BytecodeGenerator(val options: CommandLineOptions, val program: Program, val table: SymbolTable) {
+class BytecodeGenerator(private val options: CommandLineOptions, val program: Program, val table: SymbolTable) {
 
     companion object {
         const val GENERATED_BYTECODE_VERSION: Int = V1_8
@@ -87,7 +87,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
     }
 
 
-    private inner class ProcedureGenerator(val procedure: ProcedureDeclaration, val entry: ProcedureEntry) {
+    private inner class ProcedureGenerator(val procedure: ProcedureDeclaration, entry: ProcedureEntry) {
         private val scope = entry.localTable
         private val layout = entry.stackLayout
 
@@ -186,46 +186,34 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
         fun generateAssignStatement(statement: AssignStatement) =
             storeVariable(statement.target) { generateExpression(statement.value) }
 
-        fun generateWhileStatement(statement: WhileStatement) =
-            if (statement.condition is BinaryExpression && statement.condition.isSimpleComparison()) {
-                val beforeBody = Label()
-                val beforeCondition = Label()
+        fun generateWhileStatement(statement: WhileStatement) {
+            val beforeBody = Label()
+            val beforeCondition = Label()
 
-                methodWriter.visitJumpInsn(GOTO, beforeCondition)
-                run {
-                    methodWriter.visitLabel(beforeBody)
-                    generateStatement(statement.body)
-                }
-                methodWriter.visitLabel(beforeCondition)
-                generateCondition(
-                    statement.condition.lhs,
-                    statement.condition.operator,
-                    statement.condition.rhs,
-                    beforeBody
-                )
-            } else TODO()
+            methodWriter.visitJumpInsn(GOTO, beforeCondition)
+            run {
+                methodWriter.visitLabel(beforeBody)
+                generateStatement(statement.body)
+            }
+            methodWriter.visitLabel(beforeCondition)
+            generateCondition(statement.condition as BinaryExpression, beforeBody)
+        }
 
-        fun generateIfStatement(statement: IfStatement) =
-            if (statement.condition is BinaryExpression && statement.condition.isSimpleComparison()) {
-                val beforeElse = Label()
-                val afterElse = Label()
+        fun generateIfStatement(statement: IfStatement) {
+            val beforeElse = Label()
+            val afterElse = Label()
 
-                generateCondition(
-                    statement.condition.lhs,
-                    NEGATED_COMPARATORS[statement.condition.operator]!!,
-                    statement.condition.rhs,
-                    beforeElse
-                )
-                run {
-                    generateStatement(statement.thenPart)
-                    methodWriter.visitJumpInsn(GOTO, afterElse)
-                }
-                run {
-                    methodWriter.visitLabel(beforeElse)
-                    generateStatement(statement.elsePart)
-                    methodWriter.visitLabel(afterElse)
-                }
-            } else TODO()
+            generateCondition(statement.condition as BinaryExpression, beforeElse, negateOperator = true)
+            run {
+                generateStatement(statement.thenPart)
+                methodWriter.visitJumpInsn(GOTO, afterElse)
+            }
+            run {
+                methodWriter.visitLabel(beforeElse)
+                generateStatement(statement.elsePart)
+                methodWriter.visitLabel(afterElse)
+            }
+        }
 
         fun generateCallStatement(statement: CallStatement) {
             val targetEntry = scope.upperLevel?.lookupAs<ProcedureEntry>(statement.procedureName)!!
@@ -357,42 +345,41 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
         fun referenceGet(offset: Int) {
             methodWriter.visitVarInsn(ALOAD, offset)
-            methodWriter.visitMethodInsn(
-                INVOKEVIRTUAL,
+            methodWriter.visitFieldInsn(
+                GETFIELD,
                 SplJvmDefinitions.REFERENCE_INTEGER_CLASS_NAME,
-                SplJvmDefinitions.REFERENCE_INTEGER_METHOD_GET.name,
-                SplJvmDefinitions.REFERENCE_INTEGER_METHOD_GET.descriptor,
-                false
+                SplJvmDefinitions.REFERENCE_INTEGER_VALUE_NAME,
+                SplJvmDefinitions.REFERENCE_INTEGER_VALUE_DESCRIPTOR,
             )
         }
 
         fun referenceSet(offset: Int) {
             methodWriter.visitVarInsn(ALOAD, offset)
             methodWriter.visitInsn(SWAP)
-            methodWriter.visitMethodInsn(
-                INVOKEVIRTUAL,
+            methodWriter.visitFieldInsn(
+                PUTFIELD,
                 SplJvmDefinitions.REFERENCE_INTEGER_CLASS_NAME,
-                SplJvmDefinitions.REFERENCE_INTEGER_METHOD_SET.name,
-                SplJvmDefinitions.REFERENCE_INTEGER_METHOD_SET.descriptor,
-                false
+                SplJvmDefinitions.REFERENCE_INTEGER_VALUE_NAME,
+                SplJvmDefinitions.REFERENCE_INTEGER_VALUE_DESCRIPTOR,
             )
         }
 
 
         fun generateCondition(
-            lhs: Expression,
-            comparator: BinaryExpression.Operator,
-            rhs: Expression,
-            jumpOnTrue: Label
+            expression: BinaryExpression,
+            jumpOnTrue: Label,
+            negateOperator: Boolean = false
         ) {
-            generateExpression(lhs)
-            generateExpression(rhs)
+            generateExpression(expression.lhs)
+            generateExpression(expression.rhs)
+
+            val comparator = when {
+                negateOperator -> NEGATED_COMPARATORS[expression.operator]!!
+                else -> expression.operator
+            }
             methodWriter.visitJumpInsn(CONDITIONAL_OPCODES[comparator]!!, jumpOnTrue)
         }
     }
-
-    private fun BinaryExpression.isSimpleComparison(): Boolean =
-        this.lhs.dataType == PrimitiveType.Int && this.rhs.dataType == PrimitiveType.Int
 
     private fun VariableEntry.isReferenceInteger(): Boolean =
         this.isReference && this.type is PrimitiveType

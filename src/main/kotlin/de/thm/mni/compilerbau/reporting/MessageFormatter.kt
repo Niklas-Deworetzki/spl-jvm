@@ -20,17 +20,7 @@ object MessageFormatter {
 
     private fun messageLines(message: Message): List<String> {
         val linesBuffer: MutableList<String> = ArrayList()
-
         linesBuffer.add(messageHeader(message))
-        for (detail in message.details()) {
-            linesBuffer.add(messageDetail(detail))
-        }
-
-        val hint = message.hint()
-        if (hint != null) {
-            linesBuffer.add(messageHint(hint))
-        }
-
         linesBuffer.addAll(messageLocation(message))
         return linesBuffer
     }
@@ -41,14 +31,6 @@ object MessageFormatter {
         builder.text(DETAILS_SEPARATOR)
         builder.text(message.message())
         return builder.finish()
-    }
-
-    private fun messageDetail(detail: Map.Entry<String, Any?>): String {
-        return DETAILS_INDENT + detail.key + DETAILS_SEPARATOR + detail.value
-    }
-
-    private fun messageHint(hint: String): String {
-        return DETAILS_INDENT + HINT_KEY + DETAILS_SEPARATOR + hint
     }
 
     private fun messageLocation(message: Message): List<String> {
@@ -90,9 +72,7 @@ object MessageFormatter {
         return builder.finish()
     }
 
-    private const val DETAILS_INDENT = "  "
     private const val DETAILS_SEPARATOR = ": "
-    private const val HINT_KEY = "Hint"
     private const val MARKER_INDENT_DEFAULT_CHAR = ' '
     private const val MARKER_TERMINATOR_CHAR = '^'
     private const val MARKER_MIDDLE_CHAR = '~'

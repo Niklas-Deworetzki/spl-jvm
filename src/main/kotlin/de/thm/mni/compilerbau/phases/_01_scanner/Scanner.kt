@@ -1,10 +1,9 @@
 package de.thm.mni.compilerbau.phases._01_scanner
 
-import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.position.Range
 import java.io.*
 
-class Scanner(private val file: File, options: CommandLineOptions) : Closeable {
+class Scanner(private val file: File) : Closeable {
     private val input: InputStream = FileInputStream(file)
 
     private var currentOffset: Long = 0
@@ -203,7 +202,6 @@ class Scanner(private val file: File, options: CommandLineOptions) : Closeable {
             "if" to TokenType.IF,
             "else" to TokenType.ELSE,
             "while" to TokenType.WHILE,
-            "do" to TokenType.DO,
         )
 
         private val DECIMAL_DIGITS: Set<Int> = "0123456789".map(Char::code).toSet()

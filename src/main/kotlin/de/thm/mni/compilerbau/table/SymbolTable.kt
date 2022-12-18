@@ -36,8 +36,8 @@ class SymbolTable(val upperLevel: SymbolTable? = null) {
     /**
      * Converts the table to a human-readable format.
      *
-     * @param level       The level of this scope. 0 for the most inner scope, +1 for each outer scope.
-     * @return A human readable representation of the table contents.
+     * @param level The level of this scope. 0 for the most inner scope, +1 for each outer scope.
+     * @return A human-readable representation of the table contents.
      */
     fun toString(level: Int): String {
         var string = "  level $level\n"
@@ -52,7 +52,7 @@ class SymbolTable(val upperLevel: SymbolTable? = null) {
     }
 
     /**
-     * @return A human readable representation of the table contents.
+     * @return A human-readable representation of the table contents.
      */
     override fun toString() = this.toString(0)
 }

@@ -10,7 +10,7 @@ object ExtendedSyntax {
         }
     }
 
-    fun Statement.forEachChild(action: (Statement) -> Unit): Unit = when (this) {
+    private fun Statement.forEachChild(action: (Statement) -> Unit): Unit = when (this) {
         is CompoundStatement ->
             for (statement in this.statements) {
                 statement.forEachChild(action)

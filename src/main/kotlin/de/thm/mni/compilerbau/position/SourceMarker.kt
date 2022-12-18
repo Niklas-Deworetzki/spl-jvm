@@ -3,6 +3,7 @@ package de.thm.mni.compilerbau.position
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import kotlin.math.min
 
 
 class SourceMarker(range: Range) {
@@ -42,5 +43,5 @@ class SourceMarker(range: Range) {
         if (exceedsLine()) "" else line.substring(lineOffset + length)
 
     fun markedLineContents(): String =
-        line.substring(lineOffset, Math.min(lineOffset + length, line.length))
+        line.substring(lineOffset, min(lineOffset + length, line.length))
 }

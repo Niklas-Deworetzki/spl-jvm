@@ -2,9 +2,9 @@ package de.thm.mni.compilerbau.phases._06_codegen
 
 import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.absyn.Program
-import de.thm.mni.compilerbau.jvm.SplJvmDefinitions
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.GENERATED_CLASS_NAME
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.LIBRARY_CLASS_NAME
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.REFERENCE_INTEGER_CLASS_NAME
 import de.thm.mni.compilerbau.table.SymbolTable
 import java.io.File
 import java.io.FileOutputStream
@@ -36,7 +36,7 @@ class CodeGenerator(private val options: CommandLineOptions) {
             it.closeEntry()
 
             includeBuiltinResource(it, LIBRARY_CLASS_NAME)
-            it.flush()
+            includeBuiltinResource(it, REFERENCE_INTEGER_CLASS_NAME)
         }
     }
 

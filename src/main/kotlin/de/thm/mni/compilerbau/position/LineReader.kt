@@ -33,17 +33,20 @@ internal class LineReader(private val reader: Reader) : Reader() {
             if (current == '\n'.code) {
                 return finalizeLine()
             } else if (current == '\r'.code) {
-                val next = reader.read()
-                return if (next == -1) {
-                    isAtEnd = true
-                    finalizeLine()
-                } else if (next == '\n'.code) {
-                    lineBuilder.append(next.toChar())
-                    finalizeLine()
-                } else {
-                    val result = finalizeLine()
-                    lineBuilder.append(next.toChar())
-                    result
+                return when (val next = reader.read()) {
+                    -1 -> {
+                        isAtEnd = true
+                        finalizeLine()
+                    }
+                    '\n'.code -> {
+                        lineBuilder.append(next.toChar())
+                        finalizeLine()
+                    }
+                    else -> {
+                        val result = finalizeLine()
+                        lineBuilder.append(next.toChar())
+                        result
+                    }
                 }
             }
         } while (true)

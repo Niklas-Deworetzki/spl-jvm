@@ -1,6 +1,5 @@
 package de.thm.mni.compilerbau.phases._02_03_parser
 
-import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.absyn.*
 import de.thm.mni.compilerbau.absyn.Node.Companion.withPosition
 import de.thm.mni.compilerbau.phases._01_scanner.Scanner
@@ -8,7 +7,7 @@ import de.thm.mni.compilerbau.phases._01_scanner.TokenType
 import de.thm.mni.compilerbau.phases._01_scanner.TokenType.*
 import de.thm.mni.compilerbau.table.Identifier
 
-class Parser(scanner: Scanner, val options: CommandLineOptions) : AbstractParser<Program>(scanner) {
+class Parser(scanner: Scanner) : AbstractParser<Program>(scanner) {
 
     override fun describeTokenType(tokenType: TokenType): String = tokenType.toString()
 

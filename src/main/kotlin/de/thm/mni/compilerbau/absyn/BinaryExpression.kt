@@ -64,5 +64,5 @@ class BinaryExpression(val lhs: Expression, val operator: Operator, val rhs: Exp
         }
     }
 
-    override fun toString(): String = formatAst("BinaryExpression", operator, lhs, rhs)
+    override fun toString(): String = formatAst("BinaryExpression", operator.representation, lhs, rhs)
 }
