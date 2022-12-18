@@ -5,8 +5,8 @@ package de.thm.mni.compilerbau.phases._05_varalloc
  * It contains the sizes of the various subareas and provides methods to retrieve information about the stack frame required to generate code for the procedure.
  */
 class StackLayout(
-    argumentAreaSize: Int,
-    localVariablesAreaSize: Int,
+    val argumentAreaSize: Int,
+    val localVariablesAreaSize: Int,
     val referencePoolSize: Int
 ) {
     private val poolOffset: Int = argumentAreaSize + localVariablesAreaSize
