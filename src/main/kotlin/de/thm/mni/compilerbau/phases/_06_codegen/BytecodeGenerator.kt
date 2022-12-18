@@ -3,7 +3,9 @@ package de.thm.mni.compilerbau.phases._06_codegen
 import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.absyn.*
 import de.thm.mni.compilerbau.jvm.JavaTypeDescriptors.javaMethodDescriptor
+import de.thm.mni.compilerbau.jvm.JavaTypeDescriptors.javaTypeDescriptor
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions
+import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.REFERENCE_INTEGER_CLASS_DESCRIPTOR
 import de.thm.mni.compilerbau.jvm.SplJvmDefinitions.javaInternalName
 import de.thm.mni.compilerbau.table.ProcedureEntry
 import de.thm.mni.compilerbau.table.SymbolTable
@@ -98,6 +100,7 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
 
         private val beginOfProcedure = Label()
         private val endOfProcedure = Label()
+        private val endOfPrologue = Label()
 
         fun generateCode() {
             methodWriter.visitCode() // Start generating code.
@@ -107,8 +110,10 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
                 val initializer = VariableInitializer(methodWriter)
                 initializer.initializeReferencePool(layout)
                 for (variable in procedure.variables) {
-                    initializer.initialize(scope.lookupAs(variable.name))
+                    val entry = scope.lookupAs<VariableEntry>(variable.name)
+                    initializer.initialize(entry)
                 }
+                methodWriter.visitLabel(endOfPrologue)
 
                 // TODO: Check array sizes (on demand)
                 for (statement in procedure.body) {
@@ -119,7 +124,43 @@ class BytecodeGenerator(val options: CommandLineOptions, val program: Program, v
             methodWriter.visitLabel(endOfProcedure)
 
             methodWriter.visitMaxs(ASM_AUTO_COMPUTE, ASM_AUTO_COMPUTE)
+            generateDebugInformation()
             methodWriter.visitEnd()
+        }
+
+        private fun generateDebugInformation() {
+            for (parameter in procedure.parameters) {
+                val entry = scope.lookupAs<VariableEntry>(parameter.name)
+                methodWriter.visitLocalVariable(
+                    parameter.name.toString(),
+                    entry.type.javaTypeDescriptor(),
+                    null,
+                    beginOfProcedure,
+                    endOfProcedure,
+                    entry.offset
+                )
+            }
+            for (variable in procedure.variables) {
+                val entry = scope.lookupAs<VariableEntry>(variable.name)
+                methodWriter.visitLocalVariable(
+                    variable.name.toString(),
+                    entry.type.javaTypeDescriptor(),
+                    null,
+                    beginOfProcedure,
+                    endOfProcedure,
+                    entry.offset
+                )
+            }
+            for (index in 0 until layout.referencePoolSize) {
+                methodWriter.visitLocalVariable(
+                    "\$$index",
+                    REFERENCE_INTEGER_CLASS_DESCRIPTOR,
+                    null,
+                    beginOfProcedure,
+                    endOfPrologue,
+                    layout.poolIndexToOffset(index)
+                )
+            }
         }
 
         fun generateStatement(statement: Statement): Unit = when (statement) {
