@@ -40,10 +40,4 @@ class CommandLineOptions {
             "Supported values are: \${COMPLETION-CANDIDATES}"]
     )
     var debug: DebugPhase? = null
-
-    var ershovOptimization = false
-    var doWhileEnabled = false
-    var firstClassBoolean = false
-    var nestedScopesEnabled = false
-
 }

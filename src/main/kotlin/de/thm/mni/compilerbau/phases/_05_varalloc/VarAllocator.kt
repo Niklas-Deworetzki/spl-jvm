@@ -2,7 +2,6 @@ package de.thm.mni.compilerbau.phases._05_varalloc
 
 import de.thm.mni.compilerbau.CommandLineOptions
 import de.thm.mni.compilerbau.absyn.*
-import de.thm.mni.compilerbau.jvm.InternalType
 import de.thm.mni.compilerbau.phases._05_varalloc.AllocationPrettyPrinter.formatVars
 import de.thm.mni.compilerbau.table.ParameterType
 import de.thm.mni.compilerbau.table.ProcedureEntry
@@ -34,20 +33,16 @@ class VarAllocator(private val options: CommandLineOptions) {
     private fun computeStackLayout(declaration: ProcedureDeclaration, entry: ProcedureEntry) {
         val referencePoolSize = ArgumentCalculator(declaration, entry.localTable).computeReferencePoolSize()
 
-        val arguments = mutableListOf<InternalType>()
-        for (parameter in declaration.parameters) {
+        for ((index, parameter) in declaration.parameters.withIndex()) {
             val localVariable = entry.localTable.lookupAs<VariableEntry>(parameter.name)
-            localVariable.offset = arguments.size
-            arguments.add(InternalType.of(localVariable))
+            localVariable.offset = index
         }
-        val variables = mutableListOf<InternalType>()
-        for (variable in declaration.variables) {
+        for ((index, variable) in declaration.variables.withIndex()) {
             val localVariable = entry.localTable.lookupAs<VariableEntry>(variable.name)
-            localVariable.offset = arguments.size + variables.size
-            variables.add(InternalType.of(localVariable))
+            localVariable.offset = index + declaration.parameters.size
         }
 
-        entry.stackLayout = StackLayout(arguments, variables, referencePoolSize)
+        entry.stackLayout = StackLayout(declaration.parameters.size, declaration.variables.size, referencePoolSize)
     }
 
     private class ArgumentCalculator(val declaration: ProcedureDeclaration, val scope: SymbolTable) {
