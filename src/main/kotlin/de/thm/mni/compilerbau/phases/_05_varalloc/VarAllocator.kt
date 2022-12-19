@@ -73,7 +73,7 @@ class VarAllocator(private val options: CommandLineOptions) {
                             Argument.ByReferenceInteger
 
                         else ->
-                            Argument.ByValue
+                            Argument.ByIntegerValue
                     }
                 }
                 this.simultaneousArgumentsRequiringPromotion =
@@ -83,7 +83,12 @@ class VarAllocator(private val options: CommandLineOptions) {
 
         private fun argumentRequiresPromotion(argument: Argument): Boolean {
             val variable = argument.asVariable()
-            return variable is NamedVariable && !scope.lookupAs<VariableEntry>(variable.name).isReference
+            if (variable.dataType is ArrayType)
+                return false // Arrays already are references.
+
+            if (variable is NamedVariable)
+                return !scope.lookupAs<VariableEntry>(variable.name).isReference
+            return true
         }
     }
 }

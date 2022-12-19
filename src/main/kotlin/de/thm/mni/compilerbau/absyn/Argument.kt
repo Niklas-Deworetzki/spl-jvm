@@ -6,7 +6,7 @@ class Argument(val value: Expression) : Node() {
     override fun toString(): String = formatAst("Argument", value)
 
     sealed interface PassingMode
-    object ByValue : PassingMode
+    object ByIntegerValue : PassingMode
     object ByReferenceInteger : PassingMode
     object ByReferenceArray : PassingMode
     class PromoteToReference(val referencePoolIndex: Int) : PassingMode

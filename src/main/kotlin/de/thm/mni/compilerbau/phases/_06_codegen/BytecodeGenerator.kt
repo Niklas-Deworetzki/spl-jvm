@@ -223,7 +223,7 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
             val promotedReferenceArguments = mutableListOf<Argument>()
             for (argument in statement.arguments) {
                 when (argument.passingMode) {
-                    is Argument.ByValue -> // Simply evaluate argument.
+                    is Argument.ByIntegerValue -> // Simply evaluate argument.
                         generateExpression(argument.value)
 
                     is Argument.ByReferenceArray -> // Places array as reference on stack.
@@ -319,7 +319,10 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
             is ArrayAccess -> {
                 loadVariable(variable.array)
                 generateExpression(variable.index)
-                methodWriter.visitInsn(AALOAD)
+                when (variable.dataType) {
+                    is ArrayType -> methodWriter.visitInsn(AALOAD)
+                    else -> methodWriter.visitInsn(IALOAD)
+                }
             }
         }
 
