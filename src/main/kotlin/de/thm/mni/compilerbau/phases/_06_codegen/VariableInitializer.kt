@@ -32,13 +32,14 @@ class VariableInitializer(private val methodWriter: MethodVisitor) {
             val dimensions = arrayDimensions(variable.type)
             if (dimensions.size == 1) {
                 methodWriter.push(dimensions.first())
-                methodWriter.visitIntInsn(NEWARRAY, INTEGER)
+                methodWriter.visitIntInsn(NEWARRAY, T_INT)
             } else {
                 for (dimension in dimensions) {
                     methodWriter.push(dimension)
                 }
                 methodWriter.visitMultiANewArrayInsn(variable.type.javaTypeDescriptor(), dimensions.size)
             }
+            methodWriter.visitVarInsn(ASTORE, variable.offset)
         } else {
             methodWriter.push(0)
             methodWriter.visitVarInsn(ISTORE, variable.offset)
