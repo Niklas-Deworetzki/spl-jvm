@@ -1,14 +1,11 @@
-package spllib;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Library file for SPL holding all procedures defined in the SPL standard library.
  */
-public class SplLib {
+public final class SplLib {
     public static void main(String[] args) {
         Spl.main();
     }
@@ -17,32 +14,31 @@ public class SplLib {
     private static final long START_TIME = System.currentTimeMillis();
 
     public static void printi(int i) {
-        System.out.println(i);
+        System.out.print(i);
     }
 
     public static void printc(int i) {
         System.out.write(i);
     }
 
-    public static void readi(AtomicInteger i) {
+    public static void readi(IntRef i) {
         while (true) {
             try {
-                int parsed = Integer.parseInt(BUFFERED_INPUT.readLine());
-                i.set(parsed);
+                i.value = Integer.parseInt(BUFFERED_INPUT.readLine());
                 return;
             } catch (IOException ioException) {
-                i.set(-1);
+                i.value = -1;
             } catch (NumberFormatException invalidInput) {
                 // Try again.
             }
         }
     }
 
-    public static void readc(AtomicInteger i) {
+    public static void readc(IntRef i) {
         try {
-            i.set(BUFFERED_INPUT.read());
+            i.value = BUFFERED_INPUT.read();
         } catch (IOException ioException) {
-            i.set(-1);
+            i.value = -1;
         }
     }
 
@@ -50,9 +46,9 @@ public class SplLib {
         System.exit(1);
     }
 
-    public static void time(AtomicInteger i) {
+    public static void time(IntRef i) {
         long runtime = START_TIME - System.currentTimeMillis();
-        i.set((int) runtime);
+        i.value = (int) runtime;
     }
 
 

@@ -1,5 +1,3 @@
-package spllib;
-
 /**
  * SPL integer type with support for by-reference semantics.
  */
