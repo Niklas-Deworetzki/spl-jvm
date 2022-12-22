@@ -5,9 +5,11 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import kotlin.math.min
 
-
+/**
+ * Description of [Range] in source code, annotated with the source code line.
+ */
 class SourceMarker(range: Range) {
-    val file: File = range.file
+    private val file: File = range.file
 
     val line: String
     val lineNumber: Int

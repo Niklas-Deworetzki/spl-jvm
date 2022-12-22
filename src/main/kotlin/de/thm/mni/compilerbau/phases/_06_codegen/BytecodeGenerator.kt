@@ -64,8 +64,8 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
     }
 
     private fun procedureVisibility(procedure: ProcedureDeclaration): Int = when {
+        procedure.name == IDENTIFIER_MAIN -> ACC_PUBLIC // Main must always be visible as program entry point.
         options.makePublic -> ACC_PUBLIC
-        procedure.name == IDENTIFIER_MAIN -> ACC_PUBLIC
         else -> ACC_PRIVATE
     }
 
@@ -82,7 +82,6 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
 
         for (procedure in program.declarations.filterIsInstance<ProcedureDeclaration>()) {
             val entry = table.lookup(procedure.name) as ProcedureEntry
-
             ProcedureGenerator(procedure, entry).generateCode()
         }
 
@@ -98,10 +97,11 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
             procedureVisibility(procedure) + ACC_STATIC,
             procedure.name.toString(),
             entry.javaMethodDescriptor(),
-            null,
-            emptyArray()
+            null, // No signature.
+            emptyArray() // Don't throw exceptions.
         )
 
+        // Labels used to mark variable lifetime in debug info.
         private val beginOfProcedure = Label()
         private val endOfProcedure = Label()
         private val endOfPrologue = Label()
@@ -110,25 +110,30 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
             methodWriter.visitCode() // Start generating code.
 
             methodWriter.visitLabel(beginOfProcedure)
-            run {
-                val initializer = VariableInitializer(methodWriter)
-                initializer.initializeReferencePool(layout)
-                for (variable in procedure.variables) {
-                    val entry = scope.lookupAs<VariableEntry>(variable.name)
-                    initializer.initialize(entry)
-                }
-                methodWriter.visitLabel(endOfPrologue)
-
-                for (statement in procedure.body) {
-                    generateStatement(statement)
-                }
-                methodWriter.visitInsn(RETURN)
-            }
+            generateLocalVariableInitializers()
+            generateMethodBody()
+            methodWriter.visitInsn(RETURN)
             methodWriter.visitLabel(endOfProcedure)
 
             methodWriter.visitMaxs(ASM_AUTO_COMPUTE, ASM_AUTO_COMPUTE)
             generateDebugInformation()
             methodWriter.visitEnd()
+        }
+
+        private fun generateLocalVariableInitializers() {
+            val initializer = VariableInitializer(methodWriter)
+            initializer.initializeReferencePool(layout)
+            for (variable in procedure.variables) {
+                val entry = scope.lookupAs<VariableEntry>(variable.name)
+                initializer.initialize(entry)
+            }
+            methodWriter.visitLabel(endOfPrologue)
+        }
+
+        private fun generateMethodBody() {
+            for (statement in procedure.body) {
+                generateStatement(statement)
+            }
         }
 
         private fun generateDebugInformation() {
@@ -218,8 +223,21 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
         }
 
         fun generateCallStatement(statement: CallStatement) {
-            val targetEntry = scope.upperLevel?.lookupAs<ProcedureEntry>(statement.procedureName)!!
+            val promotedReferenceArguments = prepareArguments(statement)
 
+            val targetEntry = scope.upperLevel?.lookupAs<ProcedureEntry>(statement.procedureName)!!
+            methodWriter.visitMethodInsn(
+                INVOKESTATIC,
+                if (targetEntry.isInternal) LIBRARY_CLASS_NAME else GENERATED_CLASS_NAME,
+                statement.procedureName.toString(),
+                targetEntry.javaMethodDescriptor(),
+                false // Is not defined on interface.
+            )
+
+            updatePromotedReferenceArguments(promotedReferenceArguments)
+        }
+
+        private fun prepareArguments(statement: CallStatement): List<Argument> {
             val promotedReferenceArguments = mutableListOf<Argument>()
             for (argument in statement.arguments) {
                 when (argument.passingMode) {
@@ -239,21 +257,18 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
                         val referencePoolIndex =
                             (argument.passingMode as Argument.PromoteToReference).referencePoolIndex
 
-                        generateExpression(argument.value) // Evaluate argument
-                        referenceSet(layout.poolIndexToOffset(referencePoolIndex)) // Store in reference from pool
-                        methodWriter.visitVarInsn(ALOAD, layout.poolIndexToOffset(referencePoolIndex)) // Get from pool
+                        referenceSet(layout.poolIndexToOffset(referencePoolIndex)) { // Update reference in pool.
+                            generateExpression(argument.value)
+                        }
+                        // Get initialized reference from pool
+                        methodWriter.visitVarInsn(ALOAD, layout.poolIndexToOffset(referencePoolIndex))
                     }
                 }
             }
+            return promotedReferenceArguments
+        }
 
-            methodWriter.visitMethodInsn(
-                INVOKESTATIC,
-                if (targetEntry.isInternal) LIBRARY_CLASS_NAME else GENERATED_CLASS_NAME,
-                statement.procedureName.toString(),
-                targetEntry.javaMethodDescriptor(),
-                false // Is not defined on interface.
-            )
-
+        private fun updatePromotedReferenceArguments(promotedReferenceArguments: List<Argument>) {
             // Update values of promoted arguments.
             for (referenceArgument in promotedReferenceArguments) {
                 val referencePoolIndex =
@@ -264,7 +279,6 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
                 }
             }
         }
-
 
         fun generateExpression(expression: Expression): Unit = when (expression) {
             is IntLiteral ->
@@ -286,11 +300,9 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
         }
 
         fun generateBinaryExpression(expression: BinaryExpression) {
-            if (expression.operator.isArithmetic()) {
-                generateExpression(expression.lhs)
-                generateExpression(expression.rhs)
-                methodWriter.visitInsn(ARITHMETIC_OPCODES[expression.operator]!!)
-            }
+            generateExpression(expression.lhs)
+            generateExpression(expression.rhs)
+            methodWriter.visitInsn(ARITHMETIC_OPCODES[expression.operator]!!)
         }
 
         fun generateUnaryExpression(expression: UnaryExpression) {
@@ -331,10 +343,10 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
                 is NamedVariable -> {
                     val entry = scope.lookupAs<VariableEntry>(variable.name)
 
-                    generateStoredValue()
                     if (entry.isReference) {
-                        referenceSet(entry.offset)
+                        referenceSet(entry.offset, generateStoredValue)
                     } else {
+                        generateStoredValue()
                         methodWriter.visitVarInsn(ISTORE, entry.offset)
                     }
                 }
@@ -358,9 +370,9 @@ class BytecodeGenerator(private val options: CommandLineOptions, val program: Pr
             )
         }
 
-        fun referenceSet(offset: Int) {
+        fun referenceSet(offset: Int, generateStoredValue: () -> Unit) {
             methodWriter.visitVarInsn(ALOAD, offset)
-            methodWriter.visitInsn(SWAP)
+            generateStoredValue()
             methodWriter.visitFieldInsn(
                 PUTFIELD,
                 SplJvmDefinitions.REFERENCE_INTEGER_CLASS_NAME,

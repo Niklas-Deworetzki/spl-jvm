@@ -3,6 +3,9 @@ package de.thm.mni.compilerbau.phases._06_codegen
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 
+/**
+ * Allows pushing integer values onto the JVM stack using the optimal internal instruction.
+ */
 object OptimizingIntegerPush {
 
     private val BYTE_RANGE = Byte.MIN_VALUE..Byte.MAX_VALUE

@@ -58,16 +58,14 @@ class TableBuilder(private val options: CommandLineOptions) : Pass() {
 
             is ProcedureDeclaration -> {
                 val localScope = SymbolTable(typeComputation.scope)
-                val parameters = mutableListOf<ParameterType>()
-
-                for (parameter in declaration.parameters) {
+                val parameters = declaration.parameters.map { parameter ->
                     val type = typeComputation.typeOf(parameter)
-                    parameters.add(ParameterType(type, parameter.isReference))
-                    enterLocal(localScope, parameter.name, VariableEntry(type, parameter.isReference), "parameter")
-
                     if (type is ArrayType && !parameter.isReference) {
                         reportError(parameter.position, "Array parameters must be passed by reference.")
                     }
+
+                    enterLocal(localScope, parameter.name, VariableEntry(type, parameter.isReference), "parameter")
+                    ParameterType(type, parameter.isReference)
                 }
 
                 for (variable in declaration.variables) {

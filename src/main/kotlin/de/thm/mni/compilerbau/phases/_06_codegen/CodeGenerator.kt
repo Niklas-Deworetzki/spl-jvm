@@ -14,9 +14,7 @@ import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
 
 /**
- * This class is used to generate the assembly code for the compiled program.
- *
- * @param options The command line options passed to the compiler
+ * This class handles the code generation and output file creation.
  */
 class CodeGenerator(private val options: CommandLineOptions) {
 

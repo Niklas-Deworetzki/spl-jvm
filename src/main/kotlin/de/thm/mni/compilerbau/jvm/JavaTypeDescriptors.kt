@@ -6,6 +6,9 @@ import de.thm.mni.compilerbau.types.ArrayType
 import de.thm.mni.compilerbau.types.PrimitiveType
 import de.thm.mni.compilerbau.types.Type
 
+/**
+ * Utilities to convert internal data structures into Java type descriptors.
+ */
 object JavaTypeDescriptors {
 
     fun ProcedureEntry.javaMethodDescriptor(): String =

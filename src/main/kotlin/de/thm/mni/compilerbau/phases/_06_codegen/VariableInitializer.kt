@@ -10,6 +10,9 @@ import de.thm.mni.compilerbau.types.Type
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 
+/**
+ * Class used to initialize local variables according to their types.
+ */
 class VariableInitializer(private val methodWriter: MethodVisitor) {
 
     fun initializeReferencePool(layout: StackLayout) {
