@@ -38,7 +38,7 @@ abstract class AbstractParser<P>(private val scanner: Scanner) {
     private val positionStack: MutableList<Range> = ArrayDeque()
 
     protected fun beginParsing() {
-        positionStack.add(0, lookahead.range)
+        positionStack.add(lookahead.range)
     }
 
     protected fun popPosition(): Range =
