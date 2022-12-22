@@ -51,7 +51,7 @@ private fun run(options: CommandLineOptions): Int =
         val parser = Parser(scanner)
         val program = parser.parse()
         if (program == null) {
-            for (reportedError in parser.reportedErrors) {
+            for (reportedError in scanner.errors + parser.reportedErrors) {
                 println(MessageFormatter.format(reportedError))
             }
             println("Syntax Error")

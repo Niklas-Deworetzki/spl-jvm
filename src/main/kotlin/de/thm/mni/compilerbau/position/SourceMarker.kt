@@ -33,7 +33,7 @@ class SourceMarker(range: Range) {
     }
 
     fun exceedsLine(): Boolean {
-        return lineOffset + length >= line.length
+        return lineOffset + length > line.length
     }
 
     fun lineContentsPreceding(): String =

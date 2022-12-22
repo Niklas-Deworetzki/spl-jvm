@@ -1,9 +1,10 @@
 package de.thm.mni.compilerbau.phases._01_scanner
 
+import de.thm.mni.compilerbau.phases.Pass
 import de.thm.mni.compilerbau.position.Range
 import java.io.*
 
-class Scanner(private val file: File) : Closeable {
+class Scanner(private val file: File) : Pass(), Closeable {
     private val input: InputStream = FileInputStream(file)
 
     private var currentOffset: Long = 0
@@ -16,6 +17,10 @@ class Scanner(private val file: File) : Closeable {
     private fun createToken(type: TokenType, value: Any? = null): Token =
         Token(currentRange(), type, value)
 
+    private fun reportErrorAndCreateErrorToken(message: String): Token {
+        reportError(currentRange(), message)
+        return createToken(TokenType.ERROR)
+    }
 
     private val inputBuffer: MutableList<Int> = ArrayDeque()
 
@@ -92,7 +97,15 @@ class Scanner(private val file: File) : Closeable {
             ':' -> return consumeAssignmentVariant(TokenType.COLON, TokenType.ASSIGN)
             '<' -> return consumeAssignmentVariant(TokenType.OP_LT, TokenType.OP_LE)
             '>' -> return consumeAssignmentVariant(TokenType.OP_GT, TokenType.OP_GE)
-            else -> throw LexicalError(currentRange(), String.format("Illegal character 0x%02X in input.", current))
+            else -> {
+                val characterDescription = when {
+                    Character.isWhitespace(current) || Character.isISOControl(current) ->
+                        String.format("0x%02X", current)
+
+                    else -> Character.toString(current)
+                }
+                return reportErrorAndCreateErrorToken("Illegal character $characterDescription in input.")
+            }
         }
     }
 
@@ -156,18 +169,19 @@ class Scanner(private val file: File) : Closeable {
         var secondChar = getchar()
         val result: Char
 
-        if (firstChar == -1 || secondChar == -2) {
-            throw LexicalError(currentRange(), "Unclosed character literal.")
+        if (firstChar == -1 || secondChar == -1) {
+            return reportErrorAndCreateErrorToken("Unclosed character literal.")
         } else if (firstChar.toChar() == '\\') {
             result = ESCAPED_CHARACTERS[secondChar.toChar()]
-                ?: throw LexicalError(currentRange(), "Illegal escape character.")
+                ?: return reportErrorAndCreateErrorToken("Illegal escape character.")
             secondChar = getchar()
+
         } else {
             result = firstChar.toChar()
         }
 
         if (secondChar != '\''.code) {
-            throw LexicalError(currentRange(), "Unclosed character literal.")
+            return reportErrorAndCreateErrorToken("Unclosed character literal.")
         }
 
         return createToken(TokenType.INTEGER, result.code)
@@ -212,7 +226,5 @@ class Scanner(private val file: File) : Closeable {
             'r' to '\r',
             '\\' to '\\',
         )
-
-        class LexicalError(val range: Range, message: String) : Exception(message)
     }
 }
