@@ -39,7 +39,7 @@ class TypeChecker(private val pass: Pass, val scope: SymbolTable) {
                 }
 
                 PrimitiveType.Bottom ->
-                    Unit
+                    variable.dataType = PrimitiveType.Bottom
 
                 else -> {
                     pass.reportError(variable.array.position, "Only arrays can be accessed via index.")
