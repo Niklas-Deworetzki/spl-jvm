@@ -7,6 +7,7 @@ import de.thm.mni.compilerbau.table.ProcedureEntry
 import de.thm.mni.compilerbau.table.SymbolTable
 import de.thm.mni.compilerbau.types.PrimitiveType
 import de.thm.mni.compilerbau.types.Type
+import de.thm.mni.compilerbau.utils.ExtendedSyntax.forEachStatement
 
 /**
  * This class is used to check if the currently compiled SPL program is semantically valid.
@@ -21,12 +22,8 @@ object ProcedureBodyChecker : Pass() {
             val entry = globalTable.lookup(procedure.name)!! as ProcedureEntry
             val checker = TypeChecker(this, entry.localTable)
 
-            checkAll(checker, procedure.body)
+            procedure.forEachStatement { verifyStatement(checker, it) }
         }
-    }
-
-    private fun checkAll(checker: TypeChecker, statements: List<Statement>) {
-        for (statement in statements) verifyStatement(checker, statement)
     }
 
     private fun verifyStatement(checker: TypeChecker, statement: Statement) {
@@ -43,16 +40,11 @@ object ProcedureBodyChecker : Pass() {
                 }
             }
 
-            is CompoundStatement ->
-                checkAll(checker, statement.statements)
-
             is IfStatement -> {
                 checker.verify(statement.condition)
                 if (statement.condition.dataType !in setOf(PrimitiveType.Bool, PrimitiveType.Bottom)) {
                     reportError(statement.condition.position, "Condition must be a boolean.")
                 }
-                verifyStatement(checker, statement.thenPart)
-                verifyStatement(checker, statement.elsePart)
             }
 
 
@@ -61,7 +53,6 @@ object ProcedureBodyChecker : Pass() {
                 if (statement.condition.dataType !in setOf(PrimitiveType.Bool, PrimitiveType.Bottom)) {
                     reportError(statement.condition.position, "Condition must be a boolean.")
                 }
-                verifyStatement(checker, statement.body)
             }
 
 
@@ -97,7 +88,7 @@ object ProcedureBodyChecker : Pass() {
             }
 
 
-            is EmptyStatement ->
+            else ->
                 Unit
         }
     }

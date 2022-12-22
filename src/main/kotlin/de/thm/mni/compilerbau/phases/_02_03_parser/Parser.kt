@@ -167,14 +167,9 @@ class Parser(scanner: Scanner) : AbstractParser<Program>(scanner) {
 
     private fun parseVariable(): Variable {
         beginParsing()
-        val beginPosition = current.range
-
         val name = parseIdentifier()
-        val base = NamedVariable(name).withPosition(beginPosition)
-        val variable = parseArrayAccesses(base)
-
-        popPosition()
-        return variable
+        val base = finishParsing(NamedVariable(name))
+        return parseArrayAccesses(base)
     }
 
     private fun parseArrayAccesses(base: Variable): Variable {
